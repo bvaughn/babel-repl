@@ -154,7 +154,7 @@ export default class Repl extends React.Component {
 
     if (isLoadingPlugins) {
       return {
-        compiled: '',
+        compiled: null,
         compileError: null,
         evalError: null
       };

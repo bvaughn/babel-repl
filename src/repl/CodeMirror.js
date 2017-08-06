@@ -18,7 +18,6 @@ export default class CodeMirror extends React.Component {
   static propTypes = {
     autoFocus: PropTypes.bool.isRequired,
     className: PropTypes.any,
-    defaultValue: PropTypes.string,
     name: PropTypes.string,
     onChange: PropTypes.func.isRequired,
     options: PropTypes.object,
@@ -43,9 +42,7 @@ export default class CodeMirror extends React.Component {
       ...this.props.options
     });
     this._codeMirror.on('change', this._onChange);
-    this._codeMirror.setValue(
-      this.props.defaultValue || this.props.value || ''
-    );
+    this._codeMirror.setValue(this.props.value || '');
   }
 
   componentWillUnmount() {
@@ -71,7 +68,10 @@ export default class CodeMirror extends React.Component {
       } else {
         this._codeMirror.setValue(nextProps.value);
       }
+    } else if (!nextProps.value) {
+      this._codeMirror.setValue('');
     }
+
     if (typeof nextProps.options === 'object') {
       for (let optionName in nextProps.options) {
         if (nextProps.options.hasOwnProperty(optionName)) {
