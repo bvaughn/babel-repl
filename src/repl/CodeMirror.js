@@ -16,7 +16,6 @@ export default class CodeMirror extends React.Component {
   static propTypes = {
     autoFocus: PropTypes.bool.isRequired,
     className: PropTypes.any,
-    CodeMirror: PropTypes.func.isRequired,
     defaultValue: PropTypes.string,
     name: PropTypes.string,
     onChange: PropTypes.func.isRequired,
@@ -37,8 +36,7 @@ export default class CodeMirror extends React.Component {
   };
 
   componentDidMount() {
-    const { CodeMirror } = this.props;
-    this._codeMirror = CodeMirror.fromTextArea(this._textAreaRef, {
+    this._codeMirror = window.CodeMirror.fromTextArea(this._textAreaRef, {
       ...DEFAULT_CODE_MIRROR_OPTIONS,
       ...this.props.options
     });

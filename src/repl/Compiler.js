@@ -1,12 +1,8 @@
+import PropTypes from "prop-types";
 import React, { Component } from "react";
-import { transform } from "babel-standalone";
 import CodeMirror from "./CodeMirror";
-import prettier from "prettier";
+import LazySLoader from './LazySLoader';
 import "codemirror/lib/codemirror.css";
-
-const DEFAULT_BABEL_CONFIG = {
-  presets: ["es2015", "react"]
-};
 
 const DEFAULT_PRETTIER_CONFIG = {
   printWidth: 80,
@@ -20,55 +16,72 @@ const DEFAULT_PRETTIER_CONFIG = {
   parser: "babylon"
 };
 
-const beautify = code => prettier.format(code, DEFAULT_PRETTIER_CONFIG);
-const compile = code => transform(code, DEFAULT_BABEL_CONFIG).code;
-
 export default class Compiler extends Component {
-  constructor(props, context) {
-    super(props, context);
+  static propTypes = {
+    code: PropTypes.string.isRequired,
+    minify: PropTypes.object,
+    prettify: PropTypes.bool.isRequired,
+  };
 
-    this.state = this._updateState(props.code);
+  static defaultProps = {
+    code: '',
+    minify: false,
+    prettify: false,
+  };
+
+  state = {
+    compiled: this._compile(this.props.code),
+  };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.prettify !== this.props.prettify) {
+      this.setState(state => this._updateState(state.code));
+    }
   }
 
   render() {
-    const { code, options } = this.props;
+    const { defaultValue, minify, options } = this.props;
     const { compiled, error } = this.state;
 
     return (
-      <div style={styles.row}>
-        <div style={styles.column}>
-          <CodeMirror
-            CodeMirror={window.CodeMirror}
-            onChange={this._onChange}
-            options={options}
-            style={styles.codeMirror}
-            value={code}
-          />
-          {error &&
-            <pre style={styles.error}>
-              {error.message}
-            </pre>}
-        </div>
-        <div style={styles.column}>
-          <CodeMirror
-            CodeMirror={window.CodeMirror}
-            options={{
-              ...options,
-              readOnly: true
-            }}
-            preserveScrollPosition={true}
-            style={styles.codeMirror}
-            value={compiled}
-          />
-        </div>
-      </div>
+      <CodeMirror
+        CodeMirror={window.CodeMirror}
+        options={{
+          ...options,
+          readOnly: true
+        }}
+        preserveScrollPosition={true}
+        style={styles.codeMirror}
+        value={compiled}
+      />
     );
   }
 
-  _updateState(code) {
+  _compile(code) {
     try {
+      const {minify, prettify} = this.props;
+
+      // TODO Make completely dynamic, don't hard-code
+      const presets = ["es2015", "react"];
+
+      if (minify) {
+        presets.push('babili');
+      }
+
+      let comiled = window.Babel.transform(
+        code,
+        {presets}
+      ).code;
+
+      if (prettify) {
+        compiled = window['prettier-standalone'].format(
+          compiled,
+          DEFAULT_PRETTIER_CONFIG,
+        );
+      }
+
       return {
-        compiled: beautify(compile(code)),
+        compiled: compiled,
         error: null
       };
     } catch (error) {
@@ -80,35 +93,10 @@ export default class Compiler extends Component {
       };
     }
   }
-
-  _onChange = code => {
-    this.setState(this._updateState(code));
-  };
 }
 
 const styles = {
   codeMirror: {
     height: "100%"
   },
-  column: {
-    display: "flex",
-    flex: "0 0 50%",
-    flexDirection: "column",
-    justifyContent: "stretch",
-    overflow: "auto"
-  },
-  error: {
-    order: 1,
-    flex: "0 0 auto",
-    backgroundColor: "#FEE",
-    color: "#A00",
-    margin: 0,
-    padding: "0.25rem 0.5rem"
-  },
-  row: {
-    height: "100%",
-    width: "100%",
-    display: "flex",
-    flexDirection: "row"
-  }
 };

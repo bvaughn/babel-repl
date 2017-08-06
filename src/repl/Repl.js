@@ -1,14 +1,16 @@
 import React, { Component } from "react";
-import Compiler from "./Compiler";
+import Editor from "./Editor";
 
 export default class Repl extends Component {
   state = {
-    lineWrapping: false
+    lineWrapping: false,
+    minify: false,
+    prettify: false,
   };
 
   render() {
-    const { code } = this.props;
-    const { lineWrapping } = this.state;
+    const { defaultValue } = this.props;
+    const { lineWrapping, minify, prettify } = this.state;
 
     const options = {
       lineWrapping
@@ -20,21 +22,49 @@ export default class Repl extends Component {
           <label>
             <input
               type="checkbox"
-              value={lineWrapping}
+              checked={lineWrapping}
               onChange={this._onLineWrappingChange}
             /> Line Wrap
           </label>
+          {/*
+          <label>
+            <input
+              type="checkbox"
+              checked={prettify}
+              onChange={this._onPrettifyChange}
+            /> Prettify
+          </label>
+          */}
+          {' '}
+          <label>
+            <input
+              type="checkbox"
+              checked={minify}
+              onChange={this._onMinifyChange}
+            /> Minify (Babili)
+          </label>
         </div>
-        <Compiler code={code} options={options} />
+        <Editor
+          defaultValue={defaultValue}
+          minify={minify}
+          options={options}
+          prettify={prettify}
+        />
       </div>
     );
   }
 
-  _onLineWrappingChange = event => {
-    this.setState({
-      lineWrapping: event.currentTarget.checked
-    });
-  };
+  _onLineWrappingChange = event => this.setState({
+    lineWrapping: event.currentTarget.checked
+  });
+
+  _onMinifyChange = event => this.setState({
+    minify: event.currentTarget.checked
+  });
+
+  _onPrettifyChange = event => this.setState({
+    prettify: event.currentTarget.checked
+  });
 }
 
 const styles = {

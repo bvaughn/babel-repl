@@ -11,18 +11,14 @@
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
 
+    <!--
+      Load shared resources from CDN to maximize on caching.
+      This enables us to share assets with other REPLs (eg Prettier).
+    -->
     <script src="https://unpkg.com/codemirror@5/lib/codemirror.js"></script>
     <script src="https://unpkg.com/codemirror@5/mode/javascript/javascript.js"></script>
     <script src="https://unpkg.com/codemirror@5/mode/xml/xml.js"></script>
     <script src="https://unpkg.com/codemirror@5/mode/jsx/jsx.js"></script>
-    <!--
-    <script src="https://unpkg.com/codemirror@5/addon/display/rulers.js"></script>
-    <script src="https://unpkg.com/codemirror@5/addon/search/searchcursor.js"></script>
-    <script src="https://unpkg.com/codemirror@5/addon/edit/matchbrackets.js"></script>
-    <script src="https://unpkg.com/codemirror@5/addon/edit/closebrackets.js"></script>
-    <script src="https://unpkg.com/codemirror@5/addon/comment/comment.js"></script>
-    <script src="https://unpkg.com/codemirror@5/addon/wrap/hardwrap.js"></script>
-    -->
     <script src="https://unpkg.com/codemirror@5/keymap/sublime.js"></script>
 
     <!--

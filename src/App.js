@@ -9,7 +9,7 @@ const code = `class Foo extends React.Component {
 
 class App extends Component {
   render() {
-    return <Repl code={code} />;
+    return <Repl defaultValue={code} />;
   }
 }
 
