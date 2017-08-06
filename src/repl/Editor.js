@@ -22,6 +22,7 @@ export default class Editor extends Component {
   static propTypes = {
     defaultValue: PropTypes.string.isRequired,
     options: PropTypes.object,
+    presets: PropTypes.array.isRequired,
     prettify: PropTypes.bool.isRequired
   };
 
@@ -44,6 +45,7 @@ export default class Editor extends Component {
   componentDidUpdate(prevProps) {
     if (
       prevProps.minify !== this.props.minify ||
+      prevProps.presets !== this.props.presets ||
       prevProps.prettify !== this.props.prettify
     ) {
       this.setState(state => this._updateState(state.code));
@@ -97,17 +99,16 @@ export default class Editor extends Component {
   }
 
   _compile(code) {
-    const { minify } = this.props;
+    const { minify, presets } = this.props;
 
-    // TODO Make completely dynamic; don't hard-code.
-    const presets = ["es2015", "react"];
+    const appliedPresets = presets.concat();
 
     if (minify) {
-      presets.push("babili");
+      appliedPresets.push("babili");
     }
 
     return LazyLoader.babel.transform(code, {
-      presets
+      presets: appliedPresets
     }).code;
   }
 
