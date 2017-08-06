@@ -26,6 +26,7 @@ const DEFAULT_PRESETS = {
 
 export default class Repl extends Component {
   state = {
+    evaluate: false,
     lineWrapping: false,
     minify: false,
     prettify: false,
@@ -34,7 +35,7 @@ export default class Repl extends Component {
 
   render() {
     const { defaultValue } = this.props;
-    const { lineWrapping, minify, prettify, selectedPresets } = this.state;
+    const { evaluate, lineWrapping, minify, prettify, selectedPresets } = this.state;
 
     const options = {
       lineWrapping
@@ -43,6 +44,13 @@ export default class Repl extends Component {
     return (
       <div style={styles.row}>
         <div style={styles.options}>
+          <label style={styles.label}>
+            <input
+              type="checkbox"
+              checked={evaluate}
+              onChange={this._onEvaluateChange}
+            /> Evaluate
+          </label>
           <strong style={styles.strong}>
             Presets
           </strong>
@@ -83,6 +91,7 @@ export default class Repl extends Component {
         </div>
         <Editor
           defaultValue={defaultValue}
+          evaluate={evaluate}
           minify={minify}
           options={options}
           prettify={prettify}
@@ -91,6 +100,10 @@ export default class Repl extends Component {
       </div>
     );
   }
+
+  _onEvaluateChange = event => this.setState({
+    evaluate: event.currentTarget.checked
+  });
 
   _onLineWrappingChange = event => this.setState({
     lineWrapping: event.currentTarget.checked

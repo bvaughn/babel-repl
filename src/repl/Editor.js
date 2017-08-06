@@ -21,6 +21,7 @@ const DEFAULT_PRETTIER_CONFIG = {
 export default class Editor extends Component {
   static propTypes = {
     defaultValue: PropTypes.string.isRequired,
+    evaluate: PropTypes.bool.isRequired,
     options: PropTypes.object,
     presets: PropTypes.array.isRequired,
     prettify: PropTypes.bool.isRequired
@@ -28,11 +29,14 @@ export default class Editor extends Component {
 
   static defaultProps = {
     defaultValue: "",
+    evaluate: false,
+    presets: [],
     prettify: false
   };
 
   state = {
     code: this.props.defaultValue,
+    evalError: null,
     ...this._updateState(this.props.defaultValue)
   };
 
@@ -44,6 +48,7 @@ export default class Editor extends Component {
 
   componentDidUpdate(prevProps) {
     if (
+      prevProps.evaluate !== this.props.evaluate ||
       prevProps.minify !== this.props.minify ||
       prevProps.presets !== this.props.presets ||
       prevProps.prettify !== this.props.prettify
@@ -63,7 +68,7 @@ export default class Editor extends Component {
 
   render() {
     const { defaultValue, options } = this.props;
-    const { compiled, error } = this.state;
+    const { compiled, compileError, evalError } = this.state;
 
     return (
       <div style={styles.row}>
@@ -74,9 +79,9 @@ export default class Editor extends Component {
             options={options}
             style={styles.codeMirror}
           />
-          {error &&
+          {compileError &&
             <pre style={styles.error}>
-              {error.message}
+              {compileError.message}
             </pre>}
         </div>
         <div style={styles.column}>
@@ -89,6 +94,10 @@ export default class Editor extends Component {
             style={styles.codeMirror}
             value={this._isLoading() ? LOADING_PLACEHOLDER : compiled}
           />
+          {evalError &&
+            <pre style={styles.error}>
+              {evalError.message}
+            </pre>}
         </div>
       </div>
     );
@@ -158,7 +167,7 @@ export default class Editor extends Component {
       };
     }
 
-    const { prettify } = this.props;
+    const { evaluate, prettify } = this.props;
 
     try {
       let compiled = this._compile(code);
@@ -167,16 +176,27 @@ export default class Editor extends Component {
         compiled = this._beautify(compiled);
       }
 
+      let evalError = null;
+      if (evaluate) {
+        try {
+          eval(compiled);
+        } catch (error) {
+          evalError = error;
+        }
+      }
+
       return {
         compiled,
-        error: null
+        compileError: null,
+        evalError,
       };
     } catch (error) {
       console.error(error);
 
       return {
         compiled: null,
-        error
+        compileError: error,
+        evalError: null,
       };
     }
   }
