@@ -6,6 +6,7 @@
   "dependencies": {
     "codemirror": "^5.28.0",
     "flow-bin": "^0.52.0",
+    "glamor": "^2.20.39",
     "husky": "^0.14.3",
     "lint-staged": "^4.0.2",
     "lodash.camelcase": "^4.3.0",

@@ -1,33 +1,34 @@
 // @flow
 
+import { css } from 'glamor';
 import CodeMirror from './CodeMirror';
 import React from 'react';
 
 type Props = {
+  className?: string,
   code: ?string,
   error: ?Error,
   onChange?: (value: string) => void,
-  options: Object,
-  style?: Object
+  options: Object
 };
 
 export default function CodeMirrorPanel(props: Props) {
-  const { code, error, onChange, options, style } = props;
+  const { className = '', code, error, onChange, options } = props;
 
   return (
-    <div style={{ ...styles.panel, ...style }}>
+    <div className={`${styles.panel} ${className}`}>
       <CodeMirror
+        className={styles.codeMirror}
         onChange={onChange}
         options={{
           ...options,
           readOnly: onChange == null
         }}
         preserveScrollPosition={onChange == null}
-        style={styles.codeMirror}
         value={code}
       />
       {error &&
-        <pre style={styles.error}>
+        <pre className={styles.error}>
           {error.message}
         </pre>}
     </div>
@@ -35,10 +36,10 @@ export default function CodeMirrorPanel(props: Props) {
 }
 
 const styles = {
-  codeMirror: {
+  codeMirror: css({
     height: '100%'
-  },
-  error: {
+  }),
+  error: css({
     order: 1,
     flex: '0 0 auto',
     maxHeight: '50%',
@@ -47,12 +48,12 @@ const styles = {
     color: '#A00',
     margin: 0,
     padding: '0.25rem 0.5rem'
-  },
-  panel: {
+  }),
+  panel: css({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'stretch',
     overflow: 'auto'
-  }
+  })
 };

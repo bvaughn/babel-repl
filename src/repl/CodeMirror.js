@@ -1,4 +1,5 @@
-import PropTypes from 'prop-types';
+// @flow
+
 import React from 'react';
 
 import 'codemirror/lib/codemirror.css';
@@ -14,27 +15,30 @@ const DEFAULT_CODE_MIRROR_OPTIONS = {
   tabWidth: 2
 };
 
-export default class CodeMirror extends React.Component {
-  static propTypes = {
-    autoFocus: PropTypes.bool.isRequired,
-    className: PropTypes.any,
-    name: PropTypes.string,
-    onChange: PropTypes.func.isRequired,
-    options: PropTypes.object,
-    path: PropTypes.string,
-    value: PropTypes.string,
-    preserveScrollPosition: PropTypes.bool.isRequired
-  };
+type Props = {
+  autoFocus: boolean,
+  className: string,
+  onChange: (value: string) => void,
+  options: Object,
+  value: ?string,
+  preserveScrollPosition: boolean
+};
 
+export default class CodeMirror extends React.Component {
   static defaultProps = {
     autoFocus: false,
+    className: '',
     preserveScrollPosition: false,
-    onChange: () => {}
+    onChange: (value: string) => {}
   };
 
+  props: Props;
   state = {
     isFocused: false
   };
+
+  _codeMirror: any;
+  _textAreaRef: HTMLTextAreaElement;
 
   componentDidMount() {
     this._codeMirror = window.CodeMirror.fromTextArea(this._textAreaRef, {
@@ -52,7 +56,7 @@ export default class CodeMirror extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps: Props) {
     if (
       nextProps.value &&
       nextProps.value !== this.props.value &&
@@ -88,19 +92,20 @@ export default class CodeMirror extends React.Component {
   }
 
   render() {
+    const { autoFocus, className, value } = this.props;
+
     return (
       <textarea
         autoComplete="off"
-        autoFocus={this.props.autoFocus}
-        defaultValue={this.props.value}
-        name={this.props.name || this.props.path}
+        autoFocus={autoFocus}
+        className={className}
+        defaultValue={value}
         ref={this._setTextAreaRef}
-        style={this.props.style}
       />
     );
   }
 
-  _updateOption(optionName, newValue) {
+  _updateOption(optionName: string, newValue: any) {
     const oldValue = this._codeMirror.getOption(optionName);
 
     if (oldValue !== newValue) {
@@ -108,13 +113,13 @@ export default class CodeMirror extends React.Component {
     }
   }
 
-  _onChange = (doc, change) => {
+  _onChange = (doc: any, change: any) => {
     if (change.origin !== 'setValue') {
-      this.props.onChange(doc.getValue(), change);
+      this.props.onChange(doc.getValue());
     }
   };
 
-  _setTextAreaRef = ref => {
+  _setTextAreaRef = (ref: HTMLTextAreaElement) => {
     this._textAreaRef = ref;
   };
 }

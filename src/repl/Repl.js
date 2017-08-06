@@ -1,5 +1,6 @@
 // @flow
 
+import { css } from 'glamor';
 import React from 'react';
 import CodeMirrorPanel from './CodeMirrorPanel';
 import ReplOptions from './ReplOptions';
@@ -35,6 +36,7 @@ type State = {
 };
 
 const LOADING_PLACEHOLDER_CODE = '// Loading plugins...';
+const COMPILE_ERROR_PLACEHOLDER_CODE = '// Syntax error :(';
 
 export default class Repl extends React.Component {
   static defaultProps = {
@@ -86,28 +88,37 @@ export default class Repl extends React.Component {
       lineWrapping
     };
 
+    let compiledCode;
+    if (isLoadingPlugins) {
+      compiledCode = LOADING_PLACEHOLDER_CODE;
+    } else if (compileError != null) {
+      compiledCode = COMPILE_ERROR_PLACEHOLDER_CODE;
+    } else {
+      compiledCode = compiled;
+    }
+
     return (
-      <div style={styles.row}>
+      <div className={styles.row}>
         <ReplOptions
+          className={styles.optionsColumn}
           evaluate={evaluate}
           lineWrapping={lineWrapping}
           pluginState={plugins}
           presetState={presets}
-          style={styles.optionsColumn}
           toggleSetting={this._toggleSetting}
         />
         <CodeMirrorPanel
+          className={styles.codeMirrorPanel}
           code={code}
           error={compileError}
           onChange={this._updateCode}
           options={options}
-          style={styles.codeMirrorPanel}
         />
         <CodeMirrorPanel
-          code={isLoadingPlugins ? LOADING_PLACEHOLDER_CODE : compiled}
+          className={styles.codeMirrorPanel}
+          code={compiledCode}
           error={evalError}
           options={options}
-          style={styles.codeMirrorPanel}
         />
       </div>
     );
@@ -234,17 +245,17 @@ const configToState = (
   }, {});
 
 const styles = {
-  codeMirrorPanel: {
+  codeMirrorPanel: css({
     flex: '0 1 50%'
-  },
-  optionsColumn: {
+  }),
+  optionsColumn: css({
     flex: '0 0 auto'
-  },
-  row: {
+  }),
+  row: css({
     height: '100%',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'stretch',
     overflow: 'auto'
-  }
+  })
 };

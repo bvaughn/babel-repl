@@ -1,6 +1,7 @@
 // @flow
 
-import React from 'react';
+import { css } from 'glamor';
+import React, { PureComponent } from 'react';
 import { pluginConfigs, presetPluginConfigs } from './PluginConfig';
 
 import type { PluginConfig, PluginState, PluginStateMap } from './types';
@@ -8,30 +9,34 @@ import type { PluginConfig, PluginState, PluginStateMap } from './types';
 type ToggleSetting = (name: string, isEnabled: boolean) => void;
 
 type Props = {
+  className: string,
   evaluate: boolean,
   lineWrapping: boolean,
   pluginState: PluginStateMap,
   presetState: PluginStateMap,
-  style?: Object,
   toggleSetting: ToggleSetting
 };
 
-export default class ReplOptions extends React.PureComponent {
+export default class ReplOptions extends PureComponent {
   props: Props;
+
+  static defaultProps = {
+    className: ''
+  };
 
   render() {
     const {
+      className,
       evaluate,
       lineWrapping,
       pluginState,
       presetState,
-      style,
       toggleSetting
     } = this.props;
 
     return (
-      <div style={{ ...styles.options, ...style }}>
-        <label style={styles.label}>
+      <div className={`${styles.options} ${className}`}>
+        <label className={styles.label}>
           <input
             type="checkbox"
             checked={evaluate}
@@ -39,7 +44,7 @@ export default class ReplOptions extends React.PureComponent {
           />{' '}
           Evaluate
         </label>
-        <strong style={styles.strong}>Presets</strong>
+        <strong className={styles.strong}>Presets</strong>
         {presetPluginConfigs.map(config =>
           <PluginToggle
             config={config}
@@ -48,8 +53,8 @@ export default class ReplOptions extends React.PureComponent {
             toggleSetting={toggleSetting}
           />
         )}
-        <strong style={styles.strong}>Formatting</strong>
-        <label style={styles.label}>
+        <strong className={styles.strong}>Formatting</strong>
+        <label className={styles.label}>
           <input
             type="checkbox"
             checked={lineWrapping}
@@ -85,7 +90,7 @@ type PluginToggleProps = {
 };
 
 const PluginToggle = ({ config, state, toggleSetting }: PluginToggleProps) =>
-  <label key={config.package} style={styles.label}>
+  <label key={config.package} className={styles.label}>
     <input
       checked={state.isEnabled && !state.didError}
       disabled={state.didError}
@@ -97,20 +102,25 @@ const PluginToggle = ({ config, state, toggleSetting }: PluginToggleProps) =>
   </label>;
 
 const styles = {
-  label: {
-    padding: '0.25rem 0.5rem'
-  },
-  options: {
+  label: css({
+    padding: '0.25rem 0.5rem',
+    cursor: 'pointer',
+    ':hover': {
+      backgroundColor: '#292929'
+    }
+  }),
+  options: css({
     flex: '0 0 auto',
     display: 'flex',
     flexDirection: 'column',
-    background: '#222',
+    padding: '0.5rem 0',
+    backgroundColor: '#222',
     color: '#fff',
     overflow: 'auto'
-  },
-  strong: {
+  }),
+  strong: css({
     margin: '0.5rem 0',
     padding: '0.25rem 0.5rem',
     background: '#333'
-  }
+  })
 };
