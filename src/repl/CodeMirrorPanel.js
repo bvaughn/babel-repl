@@ -41,6 +41,8 @@ const styles = {
   error: {
     order: 1,
     flex: '0 0 auto',
+    maxHeight: '50%',
+    overflow: 'auto',
     backgroundColor: '#FEE',
     color: '#A00',
     margin: 0,

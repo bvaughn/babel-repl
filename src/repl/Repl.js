@@ -15,6 +15,8 @@ import type { PluginConfigs, PluginStateMap } from './types';
 
 // TODO Update (and restore) settings from URL if present.
 // TODO Persist code and preset settings (to cookies) as fallback if no URL.
+// TODO Media query to stack panels for small-width screens.
+// TODO Collapsible options panel.
 
 type Props = {
   defaultValue: ?string
