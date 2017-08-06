@@ -5,15 +5,28 @@
   "dependencies": {
     "babel-standalone": "^6.25.0",
     "codemirror": "^5.28.0",
-    "prettier": "https://github.com/CompuIves/custom-prettier-codesandbox",
+    "flow-bin": "^0.52.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^4.0.2",
+    "lodash.camelcase": "^4.3.0",
+    "prettier": "^1.5.3",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-scripts": "1.0.10"
   },
   "scripts": {
-    "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "flow": "flow",
+    "precommit": "lint-staged",
+    "prettier": "prettier --single-quote --write 'src/**/*.{js,jsx}'",
+    "start": "react-scripts start",
+    "test": "react-scripts test --env=jsdom"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,json,css}": [
+      "prettier --single-quote --write",
+      "git add"
+    ]
   }
 }

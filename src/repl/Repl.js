@@ -1,160 +1,169 @@
-import React, { Component } from "react";
-import Editor from "./Editor";
+// @flow
 
-const PRE_LOADED_PRESETS = [
-  'env',
-  'es2015',
-  'es2015-loose',
-  'es2016',
-  'es2017',
-  'react',
-  'stage-0',
-  'stage-1',
-  'stage-2',
-  'stage-3',
-];
+import React from 'react';
+import CodeMirrorPanel from './CodeMirrorPanel';
+import ReplOptions from './ReplOptions';
+import compile from './compile';
+import { pluginConfigs, presetPluginConfigs } from './PluginConfig';
 
-const DEFAULT_PRESETS = {
-  'es2015': true,
-  'stage-2': true,
-  'react': true,
-};
+import type { PluginConfigs, PluginStateMap } from './types';
 
 // TODO Update (and restore) settings from URL if present.
 // TODO Persist code and preset settings (to cookies) as fallback if no URL.
-// TODO Move dynamic preset loading out of Editor and into Repl; Editor should just accept an array of strings.
+// TODO Check for unloaded presets when toggled
 
-export default class Repl extends Component {
-  state = {
-    evaluate: false,
-    lineWrapping: false,
-    minify: false,
-    prettify: false,
-    selectedPresets: DEFAULT_PRESETS,
+type Props = {
+  defaultValue: ?string
+};
+
+type State = {
+  code: string,
+  compiled: ?string,
+  compileError: ?Error,
+  evalError: ?Error,
+  evaluate: boolean,
+  lineWrapping: boolean,
+  plugins: PluginStateMap,
+  presets: PluginStateMap
+};
+
+export default class Repl extends React.Component {
+  static defaultProps = {
+    defaultValue: ''
   };
 
-  render() {
-    const { defaultValue } = this.props;
-    const { evaluate, lineWrapping, minify, prettify, selectedPresets } = this.state;
+  props: Props;
+  state: State;
 
-    const options = {
-      lineWrapping
+  constructor(props: Props, context: any) {
+    super(props, context);
+
+    const code = props.defaultValue || '';
+
+    const state = {
+      code,
+      compiled: null,
+      compileError: null,
+      evalError: null,
+      evaluate: false,
+      lineWrapping: false,
+      plugins: configToState(pluginConfigs),
+      presets: configToState(presetPluginConfigs)
     };
+
+    this.state = {
+      ...state,
+      ...this._compile(code, state)
+    };
+  }
+
+  render() {
+    const {
+      code,
+      compiled,
+      compileError,
+      evaluate,
+      evalError,
+      lineWrapping,
+      plugins,
+      presets
+    } = this.state;
 
     return (
       <div style={styles.row}>
-        <div style={styles.options}>
-          <label style={styles.label}>
-            <input
-              type="checkbox"
-              checked={evaluate}
-              onChange={this._onEvaluateChange}
-            /> Evaluate
-          </label>
-          <strong style={styles.strong}>
-            Presets
-          </strong>
-          {PRE_LOADED_PRESETS.map(preset => (
-            <PresetInput
-              key={preset}
-              preset={preset}
-              selectedPresets={selectedPresets}
-              setState={this.setState.bind(this)}
-            />
-          ))}
-          <strong style={styles.strong}>
-            Formatting
-          </strong>
-          <label style={styles.label}>
-            <input
-              type="checkbox"
-              checked={lineWrapping}
-              onChange={this._onLineWrappingChange}
-            /> Line Wrap
-          </label>
-          {/* TODO Re-enable when I have a Prettier UMD solution
-          <label style={styles.label}>
-            <input
-              type="checkbox"
-              checked={prettify}
-              onChange={this._onPrettifyChange}
-            /> Prettify
-          </label>
-          */}
-          <label style={styles.label}>
-            <input
-              type="checkbox"
-              checked={minify}
-              onChange={this._onMinifyChange}
-            /> Minify (Babili)
-          </label>
-        </div>
-        <Editor
-          defaultValue={defaultValue}
+        <ReplOptions
           evaluate={evaluate}
-          minify={minify}
-          options={options}
-          prettify={prettify}
-          presets={Object.keys(selectedPresets).filter(key => selectedPresets[key])}
+          lineWrapping={lineWrapping}
+          pluginState={plugins}
+          presetState={presets}
+          style={styles.optionsColumn}
+          toggleSetting={this._toggleSetting}
+        />
+        <CodeMirrorPanel
+          code={code}
+          error={compileError}
+          onChange={this._updateCode}
+          style={styles.codeMirrorPanel}
+        />
+        <CodeMirrorPanel
+          code={compiled}
+          error={evalError}
+          style={styles.codeMirrorPanel}
         />
       </div>
     );
   }
 
-  _onEvaluateChange = event => this.setState({
-    evaluate: event.currentTarget.checked
-  });
+  _compile = (code: string, state: State) => {
+    return compile(code, {
+      evaluate: state.evaluate,
+      minify: state.plugins.babili.isEnabled,
+      presets: state.presets,
+      prettify: state.plugins.prettier.isEnabled
+    });
+  };
 
-  _onLineWrappingChange = event => this.setState({
-    lineWrapping: event.currentTarget.checked
-  });
+  _toggleSetting = (name: string, isEnabled: boolean) => {
+    this.setState(
+      state => {
+        const { plugins, presets } = state;
 
-  _onMinifyChange = event => this.setState({
-    minify: event.currentTarget.checked
-  });
+        if (state.hasOwnProperty(name)) {
+          return {
+            [name]: isEnabled
+          };
+        } else if (plugins.hasOwnProperty(name)) {
+          plugins[name].isEnabled = isEnabled;
 
-  _onPrettifyChange = event => this.setState({
-    prettify: event.currentTarget.checked
-  });
+          return {
+            plugins: { ...plugins }
+          };
+        } else if (presets.hasOwnProperty(name)) {
+          presets[name].isEnabled = isEnabled;
+
+          return {
+            presets: { ...presets }
+          };
+        }
+      },
+      () => {
+        const { code } = this.state;
+
+        this._updateCode(code);
+      }
+    );
+  };
+
+  _updateCode = (code: string) => {
+    this.setState(state => this._compile(code, state));
+  };
 }
 
-const PresetInput = ({preset, selectedPresets, setState}) => (
-  <label
-    key={preset}
-    style={styles.label}
-  >
-    <input
-      type="checkbox"
-      defaultChecked={selectedPresets[preset]}
-      onChange={() => setState(state => {
-        state.selectedPresets[preset] = !state.selectedPresets[preset];
-        return {...state};
-      })}
-    /> {preset}
-  </label>
-);
+const configToState = (pluginConfigs: PluginConfigs): PluginStateMap =>
+  pluginConfigs.reduce((reduced, config) => {
+    reduced[config.package] = {
+      config,
+      isEnabled: false,
+      isLoaded: false,
+      isLoading: false,
+      plugin: null
+    };
+
+    return reduced;
+  }, {});
 
 const styles = {
-  label: {
-    padding: "0.25rem 0.5rem",
+  codeMirrorPanel: {
+    flex: '0 1 50%'
   },
-  options: {
-    flex: "0 0 auto",
-    display: "flex",
-    flexDirection: "column",
-    background: "#222",
-    color: "#fff",
-    overflow: "auto"
+  optionsColumn: {
+    flex: '0 0 auto'
   },
   row: {
-    height: "100%",
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "stretch",
-    overflow: "auto"
-  },
-  strong: {
-    padding: "0.25rem 0.5rem",
-    background: "#333",
-  },
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'stretch',
+    overflow: 'auto'
+  }
 };

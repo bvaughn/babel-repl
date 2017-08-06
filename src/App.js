@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import Repl from "./repl/Repl.js";
+import React, { Component } from 'react';
+import Repl from './repl/Repl.js';
 
 const code = `class Foo extends React.Component {
   render() {

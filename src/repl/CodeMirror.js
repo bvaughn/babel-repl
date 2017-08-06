@@ -1,12 +1,14 @@
-import PropTypes from "prop-types";
-import React from "react";
-import "./CodeMirror.css";
+import PropTypes from 'prop-types';
+import React from 'react';
+
+import 'codemirror/lib/codemirror.css'; // TODO IS this needed?
+import './CodeMirror.css';
 
 const DEFAULT_CODE_MIRROR_OPTIONS = {
   autoCloseBrackets: true,
-  keyMap: "sublime",
+  keyMap: 'sublime',
   matchBrackets: true,
-  mode: "text/jsx",
+  mode: 'text/jsx',
   lineNumbers: true,
   showCursorWhenSelecting: true,
   tabWidth: 2
@@ -40,9 +42,9 @@ export default class CodeMirror extends React.Component {
       ...DEFAULT_CODE_MIRROR_OPTIONS,
       ...this.props.options
     });
-    this._codeMirror.on("change", this._onChange);
+    this._codeMirror.on('change', this._onChange);
     this._codeMirror.setValue(
-      this.props.defaultValue || this.props.value || ""
+      this.props.defaultValue || this.props.value || ''
     );
   }
 
@@ -70,7 +72,7 @@ export default class CodeMirror extends React.Component {
         this._codeMirror.setValue(nextProps.value);
       }
     }
-    if (typeof nextProps.options === "object") {
+    if (typeof nextProps.options === 'object') {
       for (let optionName in nextProps.options) {
         if (nextProps.options.hasOwnProperty(optionName)) {
           this._updateOption(optionName, nextProps.options[optionName]);
@@ -107,7 +109,7 @@ export default class CodeMirror extends React.Component {
   }
 
   _onChange = (doc, change) => {
-    if (change.origin !== "setValue") {
+    if (change.origin !== 'setValue') {
       this.props.onChange(doc.getValue(), change);
     }
   };
