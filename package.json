@@ -2,6 +2,7 @@
   "name": "babel-repl",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://bvaughn.github.io/babel-repl",
   "dependencies": {
     "babel-standalone": "^6.25.0",
     "codemirror": "^5.28.0",
@@ -16,9 +17,11 @@
   },
   "scripts": {
     "build": "react-scripts build",
+    "deploy": "gh-pages -d build",
     "eject": "react-scripts eject",
     "flow": "flow",
     "precommit": "lint-staged",
+    "predeploy": "npm run build",
     "prettier": "prettier --single-quote --write 'src/**/*.{js,jsx}'",
     "start": "react-scripts start",
     "test": "react-scripts test --env=jsdom"
@@ -28,5 +31,8 @@
       "prettier --single-quote --write",
       "git add"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "^1.0.0"
   }
 }
