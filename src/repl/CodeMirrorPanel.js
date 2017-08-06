@@ -47,6 +47,7 @@ const styles = {
     padding: '0.25rem 0.5rem'
   },
   panel: {
+    height: '100%',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'stretch',
