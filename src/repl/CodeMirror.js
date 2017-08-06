@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import 'codemirror/lib/codemirror.css'; // TODO IS this needed?
+import 'codemirror/lib/codemirror.css';
 import './CodeMirror.css';
 
 const DEFAULT_CODE_MIRROR_OPTIONS = {
