@@ -61,7 +61,7 @@ export default class Repl extends React.Component {
       evalError: null,
       evaluate: false,
       isLoadingPlugins: false,
-      lineWrapping: false,
+      lineWrapping: true,
       plugins: configToState(pluginConfigs, false),
       presets: configToState(presetPluginConfigs, true, defaultPresets)
     };

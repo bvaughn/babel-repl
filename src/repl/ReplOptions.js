@@ -111,6 +111,7 @@ const styles = {
     },
 
     [media.small]: {
+      padding: '0.5rem 0.75rem',
       whiteSpace: 'nowrap'
     }
   }),
@@ -125,7 +126,7 @@ const styles = {
     background: '#333',
 
     [media.small]: {
-      padding: '0.5rem',
+      padding: '0.75rem',
       margin: 0
     }
   })
