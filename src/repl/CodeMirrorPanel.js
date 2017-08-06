@@ -7,17 +7,19 @@ type Props = {
   code: ?string,
   error: ?Error,
   onChange?: (value: string) => void,
+  options: Object,
   style?: Object
 };
 
 export default function CodeMirrorPanel(props: Props) {
-  const { code, error, onChange, style } = props;
+  const { code, error, onChange, options, style } = props;
 
   return (
     <div style={{ ...styles.panel, ...style }}>
       <CodeMirror
         onChange={onChange}
         options={{
+          ...options,
           readOnly: onChange == null
         }}
         style={styles.codeMirror}

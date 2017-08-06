@@ -4,8 +4,9 @@ import type { PluginConfig } from './types';
 
 const pluginConfigs: Array<PluginConfig> = [
   {
+    baseUrl: 'https://unpkg.com',
     label: 'Minify (Babili)',
-    package: 'babili',
+    package: 'babili-standalone',
     version: '0'
   },
   {
@@ -15,12 +16,20 @@ const pluginConfigs: Array<PluginConfig> = [
   }
 ];
 
+const defaultPresets = {
+  'babel-preset-es2015': true,
+  'babel-preset-react': true,
+  'babel-preset-stage-2': true
+};
+
 const presetPluginConfigs: Array<PluginConfig> = [
+  /* TODO Add support for preset-env
   {
     label: 'env',
     package: 'babel-preset-env',
     version: '1'
   },
+  */
   {
     label: 'es2015',
     package: 'babel-preset-es2015',
@@ -68,4 +77,4 @@ const presetPluginConfigs: Array<PluginConfig> = [
   }
 ];
 
-export { pluginConfigs, presetPluginConfigs };
+export { defaultPresets, pluginConfigs, presetPluginConfigs };

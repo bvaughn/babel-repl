@@ -1,6 +1,7 @@
 // @flow
 
 export type PluginConfig = {
+  baseUrl?: string,
   label: string,
   package: string,
   version: string
