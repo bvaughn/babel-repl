@@ -22,6 +22,7 @@ export default function CodeMirrorPanel(props: Props) {
           ...options,
           readOnly: onChange == null
         }}
+        preserveScrollPosition={onChange == null}
         style={styles.codeMirror}
         value={code}
       />
