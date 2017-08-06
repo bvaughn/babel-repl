@@ -3,6 +3,7 @@
 import { css } from 'glamor';
 import React, { PureComponent } from 'react';
 import { pluginConfigs, presetPluginConfigs } from './PluginConfig';
+import { media } from './styles';
 
 import type { PluginConfig, PluginState, PluginStateMap } from './types';
 
@@ -107,20 +108,25 @@ const styles = {
     cursor: 'pointer',
     ':hover': {
       backgroundColor: '#292929'
+    },
+
+    [media.small]: {
+      whiteSpace: 'nowrap'
     }
   }),
   options: css({
-    flex: '0 0 auto',
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '0.5rem 0',
     backgroundColor: '#222',
     color: '#fff',
-    overflow: 'auto'
+    '-webkit-overflow-scrolling': 'touch'
   }),
   strong: css({
     margin: '0.5rem 0',
     padding: '0.25rem 0.5rem',
-    background: '#333'
+    background: '#333',
+
+    [media.small]: {
+      padding: '0.5rem',
+      margin: 0
+    }
   })
 };

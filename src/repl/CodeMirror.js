@@ -1,9 +1,9 @@
 // @flow
 
+import { css } from 'glamor';
 import React from 'react';
 
 import 'codemirror/lib/codemirror.css';
-import './CodeMirror.css';
 
 const DEFAULT_CODE_MIRROR_OPTIONS = {
   autoCloseBrackets: true,
@@ -17,7 +17,6 @@ const DEFAULT_CODE_MIRROR_OPTIONS = {
 
 type Props = {
   autoFocus: boolean,
-  className: string,
   onChange: (value: string) => void,
   options: Object,
   value: ?string,
@@ -27,7 +26,6 @@ type Props = {
 export default class CodeMirror extends React.Component {
   static defaultProps = {
     autoFocus: false,
-    className: '',
     preserveScrollPosition: false,
     onChange: (value: string) => {}
   };
@@ -92,13 +90,12 @@ export default class CodeMirror extends React.Component {
   }
 
   render() {
-    const { autoFocus, className, value } = this.props;
+    const { autoFocus, value } = this.props;
 
     return (
       <textarea
         autoComplete="off"
         autoFocus={autoFocus}
-        className={className}
         defaultValue={value}
         ref={this._setTextAreaRef}
       />
@@ -123,3 +120,9 @@ export default class CodeMirror extends React.Component {
     this._textAreaRef = ref;
   };
 }
+
+css.global('.CodeMirror', {
+  height: '100% !important',
+  width: '100% !important',
+  '-webkit-overflow-scrolling': 'touch'
+});

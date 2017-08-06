@@ -17,16 +17,17 @@ export default function CodeMirrorPanel(props: Props) {
 
   return (
     <div className={`${styles.panel} ${className}`}>
-      <CodeMirror
-        className={styles.codeMirror}
-        onChange={onChange}
-        options={{
-          ...options,
-          readOnly: onChange == null
-        }}
-        preserveScrollPosition={onChange == null}
-        value={code}
-      />
+      <div className={styles.codeMirror}>
+        <CodeMirror
+          onChange={onChange}
+          options={{
+            ...options,
+            readOnly: onChange == null
+          }}
+          preserveScrollPosition={onChange == null}
+          value={code}
+        />
+      </div>
       {error &&
         <pre className={styles.error}>
           {error.message}
@@ -37,7 +38,9 @@ export default function CodeMirrorPanel(props: Props) {
 
 const styles = {
   codeMirror: css({
-    height: '100%'
+    display: 'block',
+    height: '100%',
+    width: '100%'
   }),
   error: css({
     order: 1,

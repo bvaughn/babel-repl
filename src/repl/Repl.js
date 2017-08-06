@@ -11,6 +11,7 @@ import {
   pluginConfigs,
   presetPluginConfigs
 } from './PluginConfig';
+import { media } from './styles';
 
 import type { PluginConfigs, PluginStateMap } from './types';
 
@@ -98,7 +99,7 @@ export default class Repl extends React.Component {
     }
 
     return (
-      <div className={styles.row}>
+      <div className={styles.repl}>
         <ReplOptions
           className={styles.optionsColumn}
           evaluate={evaluate}
@@ -107,19 +108,22 @@ export default class Repl extends React.Component {
           presetState={presets}
           toggleSetting={this._toggleSetting}
         />
-        <CodeMirrorPanel
-          className={styles.codeMirrorPanel}
-          code={code}
-          error={compileError}
-          onChange={this._updateCode}
-          options={options}
-        />
-        <CodeMirrorPanel
-          className={styles.codeMirrorPanel}
-          code={compiledCode}
-          error={evalError}
-          options={options}
-        />
+
+        <div className={styles.panels}>
+          <CodeMirrorPanel
+            className={styles.codeMirrorPanel}
+            code={code}
+            error={compileError}
+            onChange={this._updateCode}
+            options={options}
+          />
+          <CodeMirrorPanel
+            className={styles.codeMirrorPanel}
+            code={compiledCode}
+            error={evalError}
+            options={options}
+          />
+        </div>
       </div>
     );
   }
@@ -246,13 +250,37 @@ const configToState = (
 
 const styles = {
   codeMirrorPanel: css({
-    flex: '0 1 50%'
+    flex: '0 0 50%'
   }),
   optionsColumn: css({
-    flex: '0 0 auto'
+    flex: '0 0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '0.5rem 0',
+    overflow: 'auto',
+
+    [media.small]: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      width: '100%',
+      padding: 0
+    }
   }),
-  row: css({
+  repl: css({
     height: '100%',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'stretch',
+    overflow: 'auto',
+
+    [media.small]: {
+      flexDirection: 'column'
+    }
+  }),
+  panels: css({
+    height: '100%',
+    width: '100%',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'stretch',
