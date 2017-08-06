@@ -11,6 +11,7 @@ export type PluginConfigs = Array<PluginConfig>;
 
 export type PluginState = {
   config: PluginConfig,
+  didError: boolean,
   isEnabled: boolean,
   isLoaded: boolean,
   isLoading: boolean,
@@ -21,7 +22,6 @@ export type PluginStateMap = { [name: string]: PluginState };
 
 export type CompileConfig = {
   evaluate: boolean,
-  minify: boolean,
-  presets: PluginStateMap,
+  presets: Array<string>,
   prettify: boolean
 };

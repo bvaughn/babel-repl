@@ -87,7 +87,8 @@ type PluginToggleProps = {
 const PluginToggle = ({ config, state, toggleSetting }: PluginToggleProps) =>
   <label key={config.package} style={styles.label}>
     <input
-      checked={state.isEnabled}
+      checked={state.isEnabled && !state.didError}
+      disabled={state.didError}
       onChange={(event: SyntheticInputEvent) =>
         toggleSetting(config.package, event.target.checked)}
       type="checkbox"

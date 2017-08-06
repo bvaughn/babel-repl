@@ -2,8 +2,6 @@
 
 import type { CompileConfig } from './types';
 
-const babel = require('babel-standalone');
-
 type Return = {
   compiled: ?string,
   compileError: ?Error,
@@ -28,15 +26,9 @@ export default function compile(code: string, config: CompileConfig): Return {
   let evalError = null;
 
   try {
-    const presets = Object.keys(config.presets)
-      .filter(key => config.presets[key].isEnabled)
-      .map(key => config.presets[key].config.label);
-
-    if (config.minify) {
-      presets.push('babili');
-    }
-
-    compiled = babel.transform(code, { presets }).code;
+    compiled = window.Babel.transform(code, {
+      presets: config.presets
+    }).code;
 
     if (config.prettify && window.prettier !== undefined) {
       // TODO Don't re-parse; just pass Prettier the AST we already have.

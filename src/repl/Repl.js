@@ -13,9 +13,6 @@ import {
 
 import type { PluginConfigs, PluginStateMap } from './types';
 
-// Certain standalone plugins (eg Babili) require a global Babel object.
-window.Babel = require('babel-standalone');
-
 // TODO Update (and restore) settings from URL if present.
 // TODO Persist code and preset settings (to cookies) as fallback if no URL.
 
@@ -125,8 +122,14 @@ export default class Repl extends React.Component {
       if (plugin.isEnabled && !plugin.isLoaded && !plugin.isLoading) {
         this._numLoadingPlugins++;
 
-        loadPlugin(plugin, () => {
+        loadPlugin(plugin, success => {
           this._numLoadingPlugins--;
+
+          if (!success) {
+            this.setState(state => ({
+              plugins: { ...plugins }
+            }));
+          }
 
           if (this._numLoadingPlugins === 0) {
             this.setState({ isLoadingPlugins: false }, () => {
@@ -145,7 +148,9 @@ export default class Repl extends React.Component {
   }
 
   _compile = (code: string, state: State) => {
-    if (state.isLoadingPlugins) {
+    const { evaluate, isLoadingPlugins, plugins, presets } = state;
+
+    if (isLoadingPlugins) {
       return {
         compiled: '',
         compileError: null,
@@ -153,11 +158,19 @@ export default class Repl extends React.Component {
       };
     }
 
+    const presetsArray: Array<string> = Object.keys(presets)
+      .filter(key => presets[key].isEnabled && !presets[key].didError)
+      .map(key => presets[key].config.label);
+
+    const babili = plugins['babili-standalone'];
+    if (babili.isEnabled && !babili.didError) {
+      presetsArray.push('babili');
+    }
+
     return compile(code, {
-      evaluate: state.evaluate,
-      minify: state.plugins['babili-standalone'].isEnabled,
-      presets: state.presets,
-      prettify: state.plugins.prettier.isEnabled
+      evaluate: evaluate,
+      presets: presetsArray,
+      prettify: plugins.prettier.isEnabled
     });
   };
 
@@ -208,6 +221,7 @@ const configToState = (
   pluginConfigs.reduce((reduced, config) => {
     reduced[config.package] = {
       config,
+      didError: false,
       isEnabled: defaults[config.package] === true,
       isLoaded: arePreLoaded,
       isLoading: false,
