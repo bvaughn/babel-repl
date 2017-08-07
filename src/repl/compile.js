@@ -49,6 +49,7 @@ export default function compile(code: string, config: CompileConfig): Return {
   }
 
   return {
+    code,
     compiled,
     compileError,
     evalError

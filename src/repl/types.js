@@ -25,3 +25,16 @@ export type CompileConfig = {
   presets: Array<string>,
   prettify: boolean
 };
+
+export type PersistedState = {
+  babili: boolean,
+  browsers: string,
+  builtIns: boolean,
+  code: string,
+  debug: boolean,
+  evaluate: boolean,
+  lineWrap: boolean,
+  presets: string,
+  prettier: boolean,
+  targets: string
+};

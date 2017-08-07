@@ -37,6 +37,7 @@ export default class ReplOptions extends Component {
       presetState,
       toggleSetting
     } = this.props;
+    console.log('<ReplOptions> lineWrap:', lineWrap, typeof lineWrap);
 
     return (
       <div className={`${styles.options} ${className}`}>
@@ -100,7 +101,7 @@ const PluginToggle = ({ config, state, toggleSetting }: PluginToggleProps) =>
     <input
       checked={state.isEnabled && !state.didError}
       className={styles.input}
-      disabled={state.didError}
+      disabled={state.isLoading || state.didError}
       onChange={(event: SyntheticInputEvent) =>
         toggleSetting(config.package, event.target.checked)}
       type="checkbox"
@@ -126,6 +127,7 @@ const bounce = css.keyframes({
 
 const styles = {
   label: css({
+    flex: '0 0 auto',
     display: 'flex',
     alignItems: 'center',
     padding: '0 0.5rem',
@@ -181,6 +183,7 @@ const styles = {
     animationDelay: '-0.8s'
   }),
   strong: css({
+    flex: '0 0 auto',
     margin: '0.5rem 0',
     padding: '0.25rem 0.5rem',
     background: '#333',

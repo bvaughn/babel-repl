@@ -4,13 +4,14 @@ import { css } from 'glamor';
 import React from 'react';
 import CodeMirrorPanel from './CodeMirrorPanel';
 import ReplOptions from './ReplOptions';
+import StorageService from './StorageService';
+import UriUtils from './UriUtils';
 import compile from './compile';
 import loadPlugin from './loadPlugin';
 import { pluginConfigs, presetPluginConfigs } from './PluginConfig';
 import { media } from './styles';
-import { parseQuery, updateQuery } from './uri';
 
-import type { PluginConfigs, PluginStateMap } from './types';
+import type { PersistedState, PluginConfigs, PluginStateMap } from './types';
 
 type Props = {};
 type State = {
@@ -37,15 +38,20 @@ export default class Repl extends React.Component {
   constructor(props: Props, context: any) {
     super(props, context);
 
-    const query = parseQuery();
-    const code = query.code || '';
+    const persistedState = this._loadState();
+    console.log(
+      'persistedState.lineWrap:',
+      persistedState.lineWrap,
+      typeof persistedState.lineWrap,
+      persistedState
+    );
 
     const defaultPlugins = {
-      'babili-standalone': query.babili === 'true',
-      prettier: query.prettier === 'true'
+      'babili-standalone': persistedState.babili,
+      prettier: persistedState.prettier
     };
 
-    const defaultPresets = (query.presets || 'es2015,react,stage-2')
+    const defaultPresets = (persistedState.presets || 'es2015,react,stage-2')
       .split(',')
       .reduce((reduced, key) => {
         reduced[`babel-preset-${key}`] = true;
@@ -53,22 +59,27 @@ export default class Repl extends React.Component {
       }, {});
 
     // TODO Parse babel-preset-env settings
-
     const state = {
-      code,
+      code: persistedState.code,
       compiled: null,
       compileError: null,
       evalError: null,
-      evaluate: query.evaluate === 'true',
-      lineWrap: query.lineWrap === 'true',
+      evaluate: persistedState.evaluate,
+      lineWrap: persistedState.lineWrap,
       plugins: configToState(pluginConfigs, false, defaultPlugins),
       presets: configToState(presetPluginConfigs, true, defaultPresets)
     };
 
     this.state = {
       ...state,
-      ...this._compile(code, state)
+      ...this._compile(persistedState.code, state)
     };
+    console.log(
+      'state.lineWrap:',
+      this.state.lineWrap,
+      typeof this.state.lineWrap,
+      persistedState
+    );
 
     // Load any plug-ins enabled by query params
     this._checkForUnloadedPlugins();
@@ -160,6 +171,28 @@ export default class Repl extends React.Component {
     });
   };
 
+  _loadState(): PersistedState {
+    const storageState = StorageService.get('replState');
+    const queryState = UriUtils.parseQuery();
+    const merged = {
+      ...storageState,
+      ...queryState
+    };
+
+    return {
+      babili: merged.babili === true,
+      browsers: merged.browsers || '',
+      builtIns: merged.builtIns === true,
+      code: merged.code || '',
+      debug: merged.debug === true,
+      evaluate: merged.evaluate === true,
+      lineWrap: merged.lineWrap != null ? merged.lineWrap : true,
+      presets: merged.presets || '',
+      prettier: merged.prettier === true,
+      targets: merged.targets || ''
+    };
+  }
+
   _presetsToArray(state: State = this.state): Array<string> {
     const { presets } = state;
 
@@ -201,9 +234,11 @@ export default class Repl extends React.Component {
   };
 
   _updateCode = (code: string) => {
-    const { evaluate, lineWrap, plugins } = this.state;
+    this.setState(state => this._compile(code, state), this._persistState);
+  };
 
-    this.setState(state => this._compile(code, state));
+  _persistState = () => {
+    const { code, evaluate, lineWrap, plugins } = this.state;
 
     const presetsArray = this._presetsToArray();
 
@@ -213,15 +248,21 @@ export default class Repl extends React.Component {
     }
 
     // TODO Add babel-preset-env settings
-    // TODO Persist defaults to cookie to restore from URL (if there is no URL).
-    updateQuery({
+    const state = {
       babili: plugins['babili-standalone'].isEnabled,
-      code: code,
+      browsers: '', // TODO
+      builtIns: false, // TODO
+      code,
+      debug: false, // TODO
       evaluate,
       lineWrap,
-      presets: presetsArray,
-      prettier: plugins.prettier.isEnabled
-    });
+      presets: presetsArray.join(','),
+      prettier: plugins.prettier.isEnabled,
+      targets: '' // TODO
+    };
+
+    StorageService.set('replState', state);
+    UriUtils.updateQuery(state);
   };
 }
 

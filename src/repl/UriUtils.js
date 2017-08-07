@@ -1,4 +1,8 @@
+// @flow
+
 import LZString from 'lz-string';
+
+import type { PersistedState } from './types';
 
 const compress = (string: string) =>
   LZString.compressToBase64(string)
@@ -23,48 +27,74 @@ const decode = (value: any) => {
   }
 };
 
-/* URL:
-    babili=true
-    evaluate=false
-    lineWrap=true
-    presets=es2015%2Cstage-2
-    targets=
-    browsers=
-    builtIns=false
-    debug=false
-    code_lz=GYVwdgxgLglg9mABAIQDYEMAWAKAlIgbwChFEiBfIA
-*/
+const mergeDefinedKeys = (raw: Object, keys: Array<string>, target: Object) => {
+  keys.forEach(key => {
+    if (raw[key] != null) {
+      target[key] = raw[key];
+    }
+  });
+};
+
 const parseQuery = () => {
-  const parsed = document.location.hash
+  const raw = document.location.hash
     .replace(/^\#\?/, '')
     .split('&')
     .reduce((reduced: Object, pair: string) => {
       const pieces = pair.split('=');
       const name = decodeURIComponent('' + pieces[0]);
-      const value = decodeURIComponent('' + pieces[1]);
+
+      let value = decodeURIComponent('' + pieces[1]);
+      if (value === 'true' || value === 'false') {
+        value = value === 'true';
+      }
 
       reduced[name] = value;
       return reduced;
     }, {});
 
-  if (parsed.code_lz) {
-    parsed.code = decompress(parsed.code_lz);
+  const state = {};
+
+  mergeDefinedKeys(
+    raw,
+    [
+      'babili',
+      'browsers',
+      'builtIns',
+      'debug',
+      'evaluate',
+      'lineWrap',
+      'presets',
+      'prettier',
+      'targets'
+    ],
+    state
+  );
+
+  if (raw.code_lz != null) {
+    state.code = decompress(raw.code_lz || '');
   }
 
-  return parsed;
+  return state;
 };
 
-const updateQuery = (object: Object) => {
-  var query = Object.keys(object)
+const updateQuery = (state: PersistedState) => {
+  var query = Object.keys(state)
     .map(
       key =>
         key === 'code'
-          ? `${key}_lz=` + compress(object.code)
-          : key + '=' + encode(object[key])
+          ? `${key}_lz=` + compress(state.code)
+          : key + '=' + encode(state[key])
     )
     .join('&');
 
   window.location.hash = '?' + query;
 };
 
-export { compress, decode, decompress, encode, parseQuery, updateQuery };
+export default {
+  compress,
+  decode,
+  decompress,
+  encode,
+  parseQuery,
+  updateQuery
+};
