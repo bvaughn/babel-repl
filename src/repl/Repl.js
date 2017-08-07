@@ -6,31 +6,20 @@ import CodeMirrorPanel from './CodeMirrorPanel';
 import ReplOptions from './ReplOptions';
 import compile from './compile';
 import loadPlugin from './loadPlugin';
-import {
-  defaultPresets,
-  pluginConfigs,
-  presetPluginConfigs
-} from './PluginConfig';
+import { pluginConfigs, presetPluginConfigs } from './PluginConfig';
 import { media } from './styles';
+import { parseQuery, updateQuery } from './uri';
 
 import type { PluginConfigs, PluginStateMap } from './types';
 
-// TODO Update (and restore) settings from URL if present.
-// TODO Persist code and preset settings (to cookies) as fallback if no URL.
-// TODO Media query to stack panels for small-width screens.
-// TODO Collapsible options panel.
-
-type Props = {
-  defaultValue: ?string
-};
-
+type Props = {};
 type State = {
   code: string,
   compiled: ?string,
   compileError: ?Error,
   evalError: ?Error,
   evaluate: boolean,
-  lineWrapping: boolean,
+  lineWrap: boolean,
   plugins: PluginStateMap,
   presets: PluginStateMap
 };
@@ -48,16 +37,31 @@ export default class Repl extends React.Component {
   constructor(props: Props, context: any) {
     super(props, context);
 
-    const code = props.defaultValue || '';
+    const query = parseQuery();
+    const code = query.code || '';
+
+    const defaultPlugins = {
+      'babili-standalone': query.babili === 'true',
+      prettier: query.prettier === 'true'
+    };
+
+    const defaultPresets = (query.presets || 'es2015,react,stage-2')
+      .split(',')
+      .reduce((reduced, key) => {
+        reduced[`babel-preset-${key}`] = true;
+        return reduced;
+      }, {});
+
+    // TODO Parse babel-preset-env settings
 
     const state = {
       code,
       compiled: null,
       compileError: null,
       evalError: null,
-      evaluate: false,
-      lineWrapping: true,
-      plugins: configToState(pluginConfigs, false),
+      evaluate: query.evaluate === 'true',
+      lineWrap: query.lineWrap === 'true',
+      plugins: configToState(pluginConfigs, false, defaultPlugins),
       presets: configToState(presetPluginConfigs, true, defaultPresets)
     };
 
@@ -65,6 +69,9 @@ export default class Repl extends React.Component {
       ...state,
       ...this._compile(code, state)
     };
+
+    // Load any plug-ins enabled by query params
+    this._checkForUnloadedPlugins();
   }
 
   render() {
@@ -74,13 +81,13 @@ export default class Repl extends React.Component {
       compileError,
       evaluate,
       evalError,
-      lineWrapping,
+      lineWrap,
       plugins,
       presets
     } = this.state;
 
     const options = {
-      lineWrapping
+      lineWrapping: lineWrap
     };
 
     return (
@@ -88,7 +95,7 @@ export default class Repl extends React.Component {
         <ReplOptions
           className={styles.optionsColumn}
           evaluate={evaluate}
-          lineWrapping={lineWrapping}
+          lineWrap={lineWrap}
           pluginState={plugins}
           presetState={presets}
           toggleSetting={this._toggleSetting}
@@ -141,30 +148,25 @@ export default class Repl extends React.Component {
         });
       }
     }
-
-    if (this._numLoadingPlugins > 0) {
-      this.forceUpdate(); // Maybe?
-    }
   }
 
   _compile = (code: string, state: State) => {
     const { evaluate, plugins, presets } = state;
 
-    const presetsArray: Array<string> = Object.keys(presets)
-      .filter(key => presets[key].isEnabled && presets[key].isLoaded)
-      .map(key => presets[key].config.label);
-
-    const babili = plugins['babili-standalone'];
-    if (babili.isEnabled && babili.isLoaded) {
-      presetsArray.push('babili');
-    }
-
     return compile(code, {
       evaluate: evaluate,
-      presets: presetsArray,
+      presets: this._presetsToArray(state),
       prettify: plugins.prettier.isEnabled
     });
   };
+
+  _presetsToArray(state: State = this.state): Array<string> {
+    const { presets } = state;
+
+    return Object.keys(presets)
+      .filter(key => presets[key].isEnabled && presets[key].isLoaded)
+      .map(key => presets[key].config.label);
+  }
 
   _toggleSetting = (name: string, isEnabled: boolean) => {
     this.setState(
@@ -199,7 +201,27 @@ export default class Repl extends React.Component {
   };
 
   _updateCode = (code: string) => {
+    const { evaluate, lineWrap, plugins } = this.state;
+
     this.setState(state => this._compile(code, state));
+
+    const presetsArray = this._presetsToArray();
+
+    const babili = plugins['babili-standalone'];
+    if (babili.isEnabled && babili.isLoaded) {
+      presetsArray.push('babili');
+    }
+
+    // TODO Add babel-preset-env settings
+    // TODO Persist defaults to cookie to restore from URL (if there is no URL).
+    updateQuery({
+      babili: plugins['babili-standalone'].isEnabled,
+      code: code,
+      evaluate,
+      lineWrap,
+      presets: presetsArray,
+      prettier: plugins.prettier.isEnabled
+    });
   };
 }
 

@@ -16,12 +16,6 @@ const pluginConfigs: Array<PluginConfig> = [
   }
 ];
 
-const defaultPresets = {
-  'babel-preset-es2015': true,
-  'babel-preset-react': true,
-  'babel-preset-stage-2': true
-};
-
 const presetPluginConfigs: Array<PluginConfig> = [
   /* TODO Add support for preset-env
   {
@@ -77,4 +71,4 @@ const presetPluginConfigs: Array<PluginConfig> = [
   }
 ];
 
-export { defaultPresets, pluginConfigs, presetPluginConfigs };
+export { pluginConfigs, presetPluginConfigs };

@@ -12,7 +12,7 @@ type ToggleSetting = (name: string, isEnabled: boolean) => void;
 type Props = {
   className: string,
   evaluate: boolean,
-  lineWrapping: boolean,
+  lineWrap: boolean,
   pluginState: PluginStateMap,
   presetState: PluginStateMap,
   toggleSetting: ToggleSetting
@@ -32,7 +32,7 @@ export default class ReplOptions extends Component {
     const {
       className,
       evaluate,
-      lineWrapping,
+      lineWrap,
       pluginState,
       presetState,
       toggleSetting
@@ -61,7 +61,7 @@ export default class ReplOptions extends Component {
         <strong className={styles.strong}>Formatting</strong>
         <label className={styles.label}>
           <input
-            checked={lineWrapping}
+            checked={lineWrap}
             className={styles.input}
             onChange={this._onLineWrappingChange}
             type="checkbox"
@@ -85,7 +85,7 @@ export default class ReplOptions extends Component {
   };
 
   _onLineWrappingChange = (event: SyntheticInputEvent) => {
-    this.props.toggleSetting('lineWrapping', event.target.checked);
+    this.props.toggleSetting('lineWrap', event.target.checked);
   };
 }
 

@@ -10,6 +10,7 @@
     "husky": "^0.14.3",
     "lint-staged": "^4.0.2",
     "lodash.camelcase": "^4.3.0",
+    "lz-string": "^1.4.4",
     "prettier": "^1.5.3",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
