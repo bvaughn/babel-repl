@@ -42,9 +42,10 @@ export default class ReplOptions extends Component {
       <div className={`${styles.options} ${className}`}>
         <label className={styles.label}>
           <input
-            type="checkbox"
             checked={evaluate}
+            className={styles.input}
             onChange={this._onEvaluateChange}
+            type="checkbox"
           />{' '}
           Evaluate
         </label>
@@ -60,9 +61,10 @@ export default class ReplOptions extends Component {
         <strong className={styles.strong}>Formatting</strong>
         <label className={styles.label}>
           <input
-            type="checkbox"
             checked={lineWrapping}
+            className={styles.input}
             onChange={this._onLineWrappingChange}
+            type="checkbox"
           />{' '}
           Line Wrap
         </label>
@@ -94,31 +96,32 @@ type PluginToggleProps = {
 };
 
 const PluginToggle = ({ config, state, toggleSetting }: PluginToggleProps) =>
-  state.isLoading
-    ? <LoadingAnimation />
-    : <label key={config.package} className={styles.label}>
-        <input
-          checked={state.isEnabled && !state.didError}
-          disabled={state.didError}
-          onChange={(event: SyntheticInputEvent) =>
-            toggleSetting(config.package, event.target.checked)}
-          type="checkbox"
-        />{' '}
-        {config.label}
-      </label>;
+  <label key={config.package} className={styles.label}>
+    <input
+      checked={state.isEnabled && !state.didError}
+      className={styles.input}
+      disabled={state.didError}
+      onChange={(event: SyntheticInputEvent) =>
+        toggleSetting(config.package, event.target.checked)}
+      type="checkbox"
+    />
+    {state.isLoading ? <LoadingAnimation /> : config.label}
+  </label>;
 
 const LoadingAnimation = () =>
   <div className={styles.spinner}>
-    <div className={`${styles.spinnerBounce} ${styles.spinnerBounce1}`} />
-    <div className={`${styles.spinnerBounce} ${styles.spinnerBounce2}`} />
-    <div className={`${styles.spinnerBounce} ${styles.spinnerBounce3}`} />
+    <div className={`${styles.tick} ${styles.tick1}`} />
+    <div className={`${styles.tick} ${styles.tick2}`} />
+    <div className={`${styles.tick} ${styles.tick3}`} />
+    <div className={`${styles.tick} ${styles.tick4}`} />
+    <div className={`${styles.tick} ${styles.tick5}`} />
   </div>;
 
 const bounce = css.keyframes({
-  '0%': { transform: 'scale(0)' },
-  '40%': { transform: 'scale(1.0)' },
-  '80%': { transform: 'scale(0)' },
-  '100%': { transform: 'scale(0)' }
+  '0%': { transform: 'scaleY(0.25)' },
+  '40%': { transform: 'scaleY(0.75)' },
+  '80%': { transform: 'scaleY(0.25)' },
+  '100%': { transform: 'scaleY(0.25)' }
 });
 
 const styles = {
@@ -137,6 +140,9 @@ const styles = {
       whiteSpace: 'nowrap'
     }
   }),
+  input: css({
+    marginRight: '0.5rem'
+  }),
   options: css({
     backgroundColor: '#222',
     color: '#fff',
@@ -145,30 +151,34 @@ const styles = {
   spinner: css({
     height: '2rem',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center'
+    alignItems: 'center'
   }),
-  spinnerBounce: css({
-    width: '10px',
-    height: '10px',
-    backgroundColor: '#fff',
-    borderRadius: '100%',
+  tick: css({
+    width: '4px',
+    height: '100%',
+    backgroundColor: 'rgba(255,255,255,0.25)',
     display: 'inline-block',
     animationName: bounce,
     animationDuration: '1.4s',
     animationIterationCount: 'infinite',
-    animationTimingFunction: 'ease-in-out'
+    animationTimingFunction: 'ease-in-out',
+    marginLeft: '6px'
   }),
-  spinnerBounce1: css({
-    animationDelay: '-0.32s',
-    marginRight: '1rem'
+  tick1: css({
+    animationDelay: 0,
+    marginLeft: 0
   }),
-  spinnerBounce2: css({
-    animationDelay: '-0.16s',
-    marginRight: '1rem'
+  tick2: css({
+    animationDelay: '-1.1s'
   }),
-  spinnerBounce3: css({
-    animationDelay: 0
+  tick3: css({
+    animationDelay: '-1.0s'
+  }),
+  tick4: css({
+    animationDelay: '-0.9s'
+  }),
+  tick5: css({
+    animationDelay: '-0.8s'
   }),
   strong: css({
     margin: '0.5rem 0',
