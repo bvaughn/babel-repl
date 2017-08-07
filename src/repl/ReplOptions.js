@@ -1,7 +1,7 @@
 // @flow
 
 import { css } from 'glamor';
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import { pluginConfigs, presetPluginConfigs } from './PluginConfig';
 import { media } from './styles';
 
@@ -18,7 +18,10 @@ type Props = {
   toggleSetting: ToggleSetting
 };
 
-export default class ReplOptions extends PureComponent {
+// The choice of Component over PureComponent is intentional here.
+// It simplifies the re-use of PluginState objects,
+// Without requiring gratuitous use of Object-spread.
+export default class ReplOptions extends Component {
   props: Props;
 
   static defaultProps = {
@@ -91,20 +94,39 @@ type PluginToggleProps = {
 };
 
 const PluginToggle = ({ config, state, toggleSetting }: PluginToggleProps) =>
-  <label key={config.package} className={styles.label}>
-    <input
-      checked={state.isEnabled && !state.didError}
-      disabled={state.didError}
-      onChange={(event: SyntheticInputEvent) =>
-        toggleSetting(config.package, event.target.checked)}
-      type="checkbox"
-    />{' '}
-    {config.label}
-  </label>;
+  state.isLoading
+    ? <LoadingAnimation />
+    : <label key={config.package} className={styles.label}>
+        <input
+          checked={state.isEnabled && !state.didError}
+          disabled={state.didError}
+          onChange={(event: SyntheticInputEvent) =>
+            toggleSetting(config.package, event.target.checked)}
+          type="checkbox"
+        />{' '}
+        {config.label}
+      </label>;
+
+const LoadingAnimation = () =>
+  <div className={styles.spinner}>
+    <div className={`${styles.spinnerBounce} ${styles.spinnerBounce1}`} />
+    <div className={`${styles.spinnerBounce} ${styles.spinnerBounce2}`} />
+    <div className={`${styles.spinnerBounce} ${styles.spinnerBounce3}`} />
+  </div>;
+
+const bounce = css.keyframes({
+  '0%': { transform: 'scale(0)' },
+  '40%': { transform: 'scale(1.0)' },
+  '80%': { transform: 'scale(0)' },
+  '100%': { transform: 'scale(0)' }
+});
 
 const styles = {
   label: css({
-    padding: '0.25rem 0.5rem',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 0.5rem',
+    height: '2rem',
     cursor: 'pointer',
     ':hover': {
       backgroundColor: '#292929'
@@ -119,6 +141,34 @@ const styles = {
     backgroundColor: '#222',
     color: '#fff',
     '-webkit-overflow-scrolling': 'touch'
+  }),
+  spinner: css({
+    height: '2rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }),
+  spinnerBounce: css({
+    width: '10px',
+    height: '10px',
+    backgroundColor: '#fff',
+    borderRadius: '100%',
+    display: 'inline-block',
+    animationName: bounce,
+    animationDuration: '1.4s',
+    animationIterationCount: 'infinite',
+    animationTimingFunction: 'ease-in-out'
+  }),
+  spinnerBounce1: css({
+    animationDelay: '-0.32s',
+    marginRight: '1rem'
+  }),
+  spinnerBounce2: css({
+    animationDelay: '-0.16s',
+    marginRight: '1rem'
+  }),
+  spinnerBounce3: css({
+    animationDelay: 0
   }),
   strong: css({
     margin: '0.5rem 0',

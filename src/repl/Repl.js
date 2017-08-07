@@ -30,14 +30,10 @@ type State = {
   compileError: ?Error,
   evalError: ?Error,
   evaluate: boolean,
-  isLoadingPlugins: boolean,
   lineWrapping: boolean,
   plugins: PluginStateMap,
   presets: PluginStateMap
 };
-
-const LOADING_PLACEHOLDER_CODE = '// Loading plugins...';
-const COMPILE_ERROR_PLACEHOLDER_CODE = '// Syntax error :(';
 
 export default class Repl extends React.Component {
   static defaultProps = {
@@ -60,7 +56,6 @@ export default class Repl extends React.Component {
       compileError: null,
       evalError: null,
       evaluate: false,
-      isLoadingPlugins: false,
       lineWrapping: true,
       plugins: configToState(pluginConfigs, false),
       presets: configToState(presetPluginConfigs, true, defaultPresets)
@@ -79,7 +74,6 @@ export default class Repl extends React.Component {
       compileError,
       evaluate,
       evalError,
-      isLoadingPlugins,
       lineWrapping,
       plugins,
       presets
@@ -88,15 +82,6 @@ export default class Repl extends React.Component {
     const options = {
       lineWrapping
     };
-
-    let compiledCode;
-    if (isLoadingPlugins) {
-      compiledCode = LOADING_PLACEHOLDER_CODE;
-    } else if (compileError != null) {
-      compiledCode = COMPILE_ERROR_PLACEHOLDER_CODE;
-    } else {
-      compiledCode = compiled;
-    }
 
     return (
       <div className={styles.repl}>
@@ -119,7 +104,7 @@ export default class Repl extends React.Component {
           />
           <CodeMirrorPanel
             className={styles.codeMirrorPanel}
-            code={compiledCode}
+            code={compiled}
             error={evalError}
             options={options}
           />
@@ -129,7 +114,7 @@ export default class Repl extends React.Component {
   }
 
   _checkForUnloadedPlugins() {
-    const { isLoadingPlugins, plugins } = this.state;
+    const { plugins } = this.state;
 
     // Assume all default presets are baked into babel-standalone
     // We really only need to worry about plugins
@@ -144,43 +129,33 @@ export default class Repl extends React.Component {
 
           if (!success) {
             this.setState(state => ({
-              plugins: { ...plugins }
+              plugins
             }));
           }
 
           if (this._numLoadingPlugins === 0) {
-            this.setState({ isLoadingPlugins: false }, () => {
-              const { code } = this.state;
+            const { code } = this.state;
 
-              this._updateCode(code);
-            });
+            this._updateCode(code);
           }
         });
       }
     }
 
-    if (!isLoadingPlugins && this._numLoadingPlugins > 0) {
-      this.setState({ isLoadingPlugins: true });
+    if (this._numLoadingPlugins > 0) {
+      this.forceUpdate(); // Maybe?
     }
   }
 
   _compile = (code: string, state: State) => {
-    const { evaluate, isLoadingPlugins, plugins, presets } = state;
-
-    if (isLoadingPlugins) {
-      return {
-        compiled: null,
-        compileError: null,
-        evalError: null
-      };
-    }
+    const { evaluate, plugins, presets } = state;
 
     const presetsArray: Array<string> = Object.keys(presets)
-      .filter(key => presets[key].isEnabled && !presets[key].didError)
+      .filter(key => presets[key].isEnabled && presets[key].isLoaded)
       .map(key => presets[key].config.label);
 
     const babili = plugins['babili-standalone'];
-    if (babili.isEnabled && !babili.didError) {
+    if (babili.isEnabled && babili.isLoaded) {
       presetsArray.push('babili');
     }
 
@@ -204,13 +179,13 @@ export default class Repl extends React.Component {
           plugins[name].isEnabled = isEnabled;
 
           return {
-            plugins: { ...plugins }
+            plugins
           };
         } else if (presets.hasOwnProperty(name)) {
           presets[name].isEnabled = isEnabled;
 
           return {
-            presets: { ...presets }
+            presets
           };
         }
       },
