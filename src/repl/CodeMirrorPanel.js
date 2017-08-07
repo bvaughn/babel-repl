@@ -40,7 +40,8 @@ const styles = {
   codeMirror: css({
     display: 'block',
     height: '100%',
-    width: '100%'
+    width: '100%',
+    overflow: 'auto'
   }),
   error: css({
     order: 1,
