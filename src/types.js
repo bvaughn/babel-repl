@@ -1,10 +1,24 @@
 // @flow
 
+export type BabelPresets = Array<string | Array<string | Object>>;
+
+export type EnvConfig = {
+  browsers: string,
+  electron: ?number,
+  isEnvPresetEnabled: boolean,
+  isElectronEnabled: boolean,
+  isNodeEnabled: boolean,
+  node: ?number
+};
+
+export type LoadScriptCallback = (success: boolean) => void;
+
 export type PluginConfig = {
   baseUrl?: string,
+  isPreLoaded?: boolean,
   label: string,
   package: string,
-  version: string
+  version?: string
 };
 
 export type PluginConfigs = Array<PluginConfig>;
@@ -22,7 +36,7 @@ export type PluginStateMap = { [name: string]: PluginState };
 
 export type CompileConfig = {
   evaluate: boolean,
-  presets: Array<string>,
+  presets: BabelPresets,
   prettify: boolean
 };
 
@@ -33,8 +47,11 @@ export type PersistedState = {
   code: string,
   debug: boolean,
   evaluate: boolean,
+  experimental: boolean,
   lineWrap: boolean,
+  loose: boolean,
   presets: string,
   prettier: boolean,
+  spec: boolean,
   targets: string
 };

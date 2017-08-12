@@ -3,6 +3,7 @@
 import { css } from 'glamor';
 import CodeMirror from './CodeMirror';
 import React from 'react';
+import { colors } from './styles';
 
 type Props = {
   className?: string,
@@ -48,10 +49,12 @@ const styles = {
     flex: '0 0 auto',
     maxHeight: '50%',
     overflow: 'auto',
-    backgroundColor: '#FEE',
-    color: '#A00',
+    backgroundColor: colors.errorBackground,
+    borderTop: `1px solid ${colors.errorBorder}`,
+    color: colors.errorForeground,
     margin: 0,
-    padding: '0.25rem 0.5rem'
+    padding: '0.25rem 0.5rem',
+    whiteSpace: 'pre-wrap'
   }),
   panel: css({
     height: '100%',

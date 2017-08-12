@@ -2,6 +2,34 @@
 
 import type { PluginConfig } from './types';
 
+const envPresetConfig: PluginConfig = {
+  label: 'Env Preset',
+  package: 'babel-preset-env-standalone',
+  version: '0'
+};
+
+const envPresetDefaults = {
+  browsers: {
+    placeholder: '> 2%, ie 11, safari > 9'
+  },
+  electron: {
+    min: 0.3,
+    default: 1.5,
+    step: 0.1
+  },
+  node: {
+    min: 0.1,
+    default: 7.4,
+    step: 0.1
+  }
+};
+
+const runtimePolyfillConfig: PluginConfig = {
+  label: 'Runtime Poylfill',
+  package: 'babel-polyfill',
+  version: '6'
+};
+
 const pluginConfigs: Array<PluginConfig> = [
   {
     baseUrl: 'https://unpkg.com',
@@ -17,58 +45,57 @@ const pluginConfigs: Array<PluginConfig> = [
 ];
 
 const presetPluginConfigs: Array<PluginConfig> = [
-  /* TODO Add support for preset-env
-  {
-    label: 'env',
-    package: 'babel-preset-env',
-    version: '1'
-  },
-  */
   {
     label: 'es2015',
     package: 'babel-preset-es2015',
-    version: '6'
+    isPreLoaded: true
   },
   {
     label: 'es2015-loose',
     package: 'babel-preset-es2015-loose',
-    version: '7'
+    isPreLoaded: true
   },
   {
     label: 'es2016',
     package: 'babel-preset-es2016',
-    version: '6'
+    isPreLoaded: true
   },
   {
     label: 'es2017',
     package: 'babel-preset-es2017',
-    version: '6'
+    isPreLoaded: true
   },
   {
     label: 'react',
     package: 'babel-preset-react',
-    version: '6'
+    isPreLoaded: true
   },
   {
     label: 'stage-0',
     package: 'babel-preset-stage-0',
-    version: '6'
+    isPreLoaded: true
   },
   {
     label: 'stage-1',
     package: 'babel-preset-stage-1',
-    version: '6'
+    isPreLoaded: true
   },
   {
     label: 'stage-2',
     package: 'babel-preset-stage-2',
-    version: '6'
+    isPreLoaded: true
   },
   {
     label: 'stage-3',
     package: 'babel-preset-stage-3',
-    version: '6'
+    isPreLoaded: true
   }
 ];
 
-export { pluginConfigs, presetPluginConfigs };
+export {
+  envPresetConfig,
+  envPresetDefaults,
+  pluginConfigs,
+  presetPluginConfigs,
+  runtimePolyfillConfig
+};
