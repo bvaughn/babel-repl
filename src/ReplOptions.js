@@ -7,6 +7,7 @@ import {
   pluginConfigs,
   presetPluginConfigs
 } from './PluginConfig';
+import PresetLoadingAnimation from './PresetLoadingAnimation';
 import Svg from './Svg';
 import { colors, media } from './styles';
 
@@ -119,7 +120,7 @@ class ExpandedContainer extends Component {
                   event.target.checked
                 )}
             />
-            {envPresetState.isLoading ? <LoadingAnimation /> : 'Enabled'}
+            {envPresetState.isLoading ? <PresetLoadingAnimation /> : 'Enabled'}
           </label>
           <div className={styles.envPresetColumn}>
             <label
@@ -207,7 +208,7 @@ class ExpandedContainer extends Component {
         </div>
 
         <div
-          className={styles.closeButton}
+          className={`${styles.closeButton} ${nestedCloseButton}`}
           onClick={() => toggleIsExpanded(false)}
         >
           <Svg
@@ -226,7 +227,10 @@ class ExpandedContainer extends Component {
 
 const CollapsedContainer = ({ toggleIsExpanded }) =>
   <div className={styles.collapsedContainer}>
-    <div className={styles.closeButton} onClick={() => toggleIsExpanded(true)}>
+    <div
+      className={`${styles.closeButton} ${nestedCloseButton}`}
+      onClick={() => toggleIsExpanded(true)}
+    >
       <Svg
         className={styles.closeButtonIcon}
         path="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"
@@ -255,24 +259,11 @@ const PluginToggle = ({
         toggleSetting(config.package, event.target.checked)}
       type="checkbox"
     />
-    {state.isLoading ? <LoadingAnimation /> : label || config.label}
+    {state.isLoading ? <PresetLoadingAnimation /> : label || config.label}
   </label>;
 
-const LoadingAnimation = () =>
-  <div className={styles.loadingAnimation}>
-    <div className={`${styles.loadingTick} ${styles.loadingTick1}`} />
-    <div className={`${styles.loadingTick} ${styles.loadingTick2}`} />
-    <div className={`${styles.loadingTick} ${styles.loadingTick3}`} />
-    <div className={`${styles.loadingTick} ${styles.loadingTick4}`} />
-    <div className={`${styles.loadingTick} ${styles.loadingTick5}`} />
-  </div>;
-
-const bounce = css.keyframes({
-  '0%': { transform: 'scaleY(0.25)' },
-  '40%': { transform: 'scaleY(0.75)' },
-  '80%': { transform: 'scaleY(0.25)' },
-  '100%': { transform: 'scaleY(0.25)' }
-});
+// Defined separately from styles due to nesting.
+const nestedCloseButton = css({});
 
 const styles = {
   wrapper: css({
@@ -280,7 +271,8 @@ const styles = {
     overflow: 'visible',
     zIndex: 6,
     backgroundColor: colors.inverseBackground,
-    color: colors.inverseForegroundLight
+    color: colors.inverseForegroundLight,
+    transition: 'transform 0.25s ease-in-out'
   }),
   collapsedContainer: css({
     backgroundColor: colors.inverseBackground,
@@ -293,6 +285,30 @@ const styles = {
     [media.mediumAndDown]: {
       height: '0.5rem',
       width: '100%'
+    },
+
+    [`& .${nestedCloseButton}`]: {
+      [media.mediumAndDown]: {
+        transition: 'top 0.25s ease-in-out',
+        top: '-0.5rem'
+      },
+
+      [media.large]: {
+        transition: 'left 0.25s ease-in-out',
+        left: '-0.5rem'
+      }
+    },
+
+    '&:hover': {
+      [`& .${nestedCloseButton}`]: {
+        [media.mediumAndDown]: {
+          top: 0
+        },
+
+        [media.large]: {
+          left: 0
+        }
+      }
     }
   }),
   expandedContainer: css({
@@ -304,14 +320,21 @@ const styles = {
 
     [media.large]: {
       flexDirection: 'column',
-      height: '100%'
+      height: '100%',
+
+      [`& .${nestedCloseButton}`]: {
+        right: '-1.5rem'
+      }
     },
 
     [media.mediumAndDown]: {
       flexDirection: 'row',
       flexWrap: 'wrap',
       overflow: 'auto',
-      maxHeight: '200px'
+
+      [`& .${nestedCloseButton}`]: {
+        bottom: '-1.5rem'
+      }
     }
   }),
   closeButton: css({
@@ -326,7 +349,6 @@ const styles = {
     [media.large]: {
       height: '4rem',
       width: '2rem',
-      left: 'calc(100% - 0.5rem)',
       top: 'calc(50% - 2rem)',
       borderTopRightRadius: '4rem',
       borderBottomRightRadius: '4rem'
@@ -336,7 +358,6 @@ const styles = {
       height: '2rem',
       width: '4rem',
       left: 'calc(50% - 2rem)',
-      top: 'calc(100% - 0.5rem)',
       borderBottomLeftRadius: '4rem',
       borderBottomRightRadius: '4rem'
     }
@@ -356,12 +377,10 @@ const styles = {
     flex: '0 0 auto',
     maxHeight: '100%',
     padding: '1rem',
-    borderBottom: `1px solid ${colors.inverseBackgroundDark}`,
     zIndex: 7,
 
     [media.mediumAndDown]: {
       flex: '1 0 100px',
-      borderRight: `1px solid ${colors.inverseBackgroundDark}`,
       maxHeight: '100%',
       overflow: 'auto'
     }
@@ -426,38 +445,5 @@ const styles = {
     '&:disabled': {
       opacity: 0.5
     }
-  }),
-  loadingAnimation: css({
-    height: '2rem',
-    display: 'flex',
-    alignItems: 'center',
-    marginLeft: '0.5rem'
-  }),
-  loadingTick: css({
-    width: '4px',
-    height: '100%',
-    backgroundColor: 'rgba(255,255,255,0.25)',
-    display: 'inline-block',
-    animationName: bounce,
-    animationDuration: '1.4s',
-    animationIterationCount: 'infinite',
-    animationTimingFunction: 'ease-in-out',
-    marginLeft: '6px'
-  }),
-  loadingTick1: css({
-    animationDelay: 0,
-    marginLeft: 0
-  }),
-  loadingTick2: css({
-    animationDelay: '-1.1s'
-  }),
-  loadingTick3: css({
-    animationDelay: '-1.0s'
-  }),
-  loadingTick4: css({
-    animationDelay: '-0.9s'
-  }),
-  loadingTick5: css({
-    animationDelay: '-0.8s'
   })
 };
