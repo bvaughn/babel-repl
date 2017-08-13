@@ -25,6 +25,7 @@ type ToggleSetting = (name: string, isEnabled: boolean) => void;
 type Props = {
   builtIns: boolean,
   className: string,
+  debugEnvPreset: boolean,
   envConfig: EnvConfig,
   envPresetState: PluginState,
   isExpanded: boolean,
@@ -60,6 +61,7 @@ class ExpandedContainer extends Component {
   render() {
     const {
       builtIns,
+      debugEnvPreset,
       envConfig,
       envPresetState,
       lineWrap,
@@ -67,10 +69,12 @@ class ExpandedContainer extends Component {
       presetState,
       runtimePolyfillConfig,
       runtimePolyfillState,
-      toggleEnvPresetSetting,
       toggleIsExpanded,
       toggleSetting
     } = this.props;
+
+    const disableEnvSettings =
+      !envPresetState.isLoaded || !envConfig.isEnvPresetEnabled;
 
     return (
       <div className={styles.expandedContainer}>
@@ -86,6 +90,7 @@ class ExpandedContainer extends Component {
             <input
               checked={lineWrap}
               onChange={this._onLineWrappingChange}
+              className={styles.inputCheckboxLeft}
               type="checkbox"
             />
             Line Wrap
@@ -117,26 +122,12 @@ class ExpandedContainer extends Component {
             {envPresetState.isLoading
               ? <PresetLoadingAnimation />
               : 'Env Preset'}
+
             <input
               checked={envConfig.isEnvPresetEnabled}
               type="checkbox"
-              onChange={(event: SyntheticInputEvent) =>
-                toggleEnvPresetSetting(
-                  'isEnvPresetEnabled',
-                  event.target.checked
-                )}
+              onChange={this._onEnvPresetEnabledChange}
             />
-          </label>
-          <label className={styles.settingsLabel}>
-            <input
-              checked={builtIns}
-              disabled={
-                !envPresetState.isLoaded || !envConfig.isEnvPresetEnabled
-              }
-              onChange={this._onBuiltInsChange}
-              type="checkbox"
-            />
-            Built-ins
           </label>
           <div className={styles.envPresetColumn}>
             <label
@@ -145,12 +136,9 @@ class ExpandedContainer extends Component {
               Browser
             </label>
             <textarea
-              disabled={
-                !envPresetState.isLoaded || !envConfig.isEnvPresetEnabled
-              }
+              disabled={disableEnvSettings}
               className={styles.envPresetInput}
-              onChange={(event: SyntheticInputEvent) =>
-                toggleEnvPresetSetting('browsers', event.target.value)}
+              onChange={this._onBrowsersChange}
               placeholder={envPresetDefaults.browsers.placeholder}
               value={envConfig.browsers}
             />
@@ -170,24 +158,14 @@ class ExpandedContainer extends Component {
               min={envPresetDefaults.electron.min}
               max={999}
               step={envPresetDefaults.electron.step}
-              onChange={(event: SyntheticInputEvent) =>
-                toggleEnvPresetSetting(
-                  'electron',
-                  parseFloat(event.target.value)
-                )}
+              onChange={this._onElectronChange}
               value={envConfig.electron}
             />
             <input
               checked={envConfig.isElectronEnabled}
               className={styles.envPresetCheckbox}
-              disabled={
-                !envPresetState.isLoaded || !envConfig.isEnvPresetEnabled
-              }
-              onChange={(event: SyntheticInputEvent) =>
-                toggleEnvPresetSetting(
-                  'isElectronEnabled',
-                  event.target.checked
-                )}
+              disabled={disableEnvSettings}
+              onChange={this._onIsElectronEnabledChange}
               type="checkbox"
             />
           </label>
@@ -206,20 +184,36 @@ class ExpandedContainer extends Component {
               min={envPresetDefaults.node.min}
               max={999}
               step={envPresetDefaults.node.step}
-              onChange={(event: SyntheticInputEvent) =>
-                toggleEnvPresetSetting('node', parseFloat(event.target.value))}
+              onChange={this._onNodeChange}
               value={envConfig.node}
             />
             <input
               checked={envConfig.isNodeEnabled}
               className={styles.envPresetCheckbox}
-              disabled={
-                !envPresetState.isLoaded || !envConfig.isEnvPresetEnabled
-              }
-              onChange={(event: SyntheticInputEvent) =>
-                toggleEnvPresetSetting('isNodeEnabled', event.target.checked)}
+              disabled={disableEnvSettings}
+              onChange={this._onIsNodeEnabledChange}
               type="checkbox"
             />
+          </label>
+          <label className={styles.settingsLabel}>
+            <input
+              checked={builtIns}
+              className={styles.inputCheckboxLeft}
+              disabled={runtimePolyfillState.isEnabled || disableEnvSettings}
+              onChange={this._onBuiltInsChange}
+              type="checkbox"
+            />
+            Built-ins
+          </label>
+          <label className={styles.settingsLabel}>
+            <input
+              checked={debugEnvPreset}
+              className={styles.inputCheckboxLeft}
+              disabled={disableEnvSettings}
+              onChange={this._onDebugChange}
+              type="checkbox"
+            />
+            Debug
           </label>
         </div>
 
@@ -236,12 +230,49 @@ class ExpandedContainer extends Component {
     );
   }
 
+  _onBrowsersChange = (event: SyntheticInputEvent) => {
+    this.props.toggleEnvPresetSetting('browsers', event.target.value);
+  };
+
+  _onEnvPresetEnabledChange = (event: SyntheticInputEvent) => {
+    this.props.toggleEnvPresetSetting(
+      'isEnvPresetEnabled',
+      event.target.checked
+    );
+  };
+
   _onBuiltInsChange = (event: SyntheticInputEvent) => {
     this.props.toggleSetting('builtIns', event.target.checked);
   };
 
+  _onDebugChange = (event: SyntheticInputEvent) => {
+    this.props.toggleSetting('debugEnvPreset', event.target.checked);
+  };
+
+  _onElectronChange = (event: SyntheticInputEvent) => {
+    this.props.toggleEnvPresetSetting(
+      'electron',
+      parseFloat(event.target.value)
+    );
+  };
+
+  _onIsElectronEnabledChange = (event: SyntheticInputEvent) => {
+    this.props.toggleEnvPresetSetting(
+      'isElectronEnabled',
+      event.target.checked
+    );
+  };
+
+  _onIsNodeEnabledChange = (event: SyntheticInputEvent) => {
+    this.props.toggleEnvPresetSetting('isNodeEnabled', event.target.checked);
+  };
+
   _onLineWrappingChange = (event: SyntheticInputEvent) => {
     this.props.toggleSetting('lineWrap', event.target.checked);
+  };
+
+  _onNodeChange = (event: SyntheticInputEvent) => {
+    this.props.toggleEnvPresetSetting('node', parseFloat(event.target.value));
   };
 }
 
@@ -274,6 +305,7 @@ const PluginToggle = ({
   <label key={config.package} className={styles.settingsLabel}>
     <input
       checked={state.isEnabled && !state.didError}
+      className={styles.inputCheckboxLeft}
       disabled={state.isLoading || state.didError}
       onChange={(event: SyntheticInputEvent) =>
         toggleSetting(config.package, event.target.checked)}
@@ -292,7 +324,11 @@ const styles = {
     zIndex: 6,
     backgroundColor: colors.inverseBackground,
     color: colors.inverseForegroundLight,
-    transition: 'transform 0.25s ease-in-out'
+    transition: 'transform 0.25s ease-in-out',
+
+    [media.large]: {
+      height: '100%' // Safari fix for scrolling/overflow
+    }
   }),
   collapsedContainer: css({
     backgroundColor: colors.inverseBackground,
@@ -413,6 +449,9 @@ const styles = {
       flex: '1 0 150px'
     }
   }),
+  inputCheckboxLeft: css({
+    marginRight: '0.5rem'
+  }),
   highlight: css({
     textTransform: 'uppercase',
     fontSize: '0.8rem',
@@ -435,12 +474,18 @@ const styles = {
     flex: '0 0 2rem',
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    margin: '0 -1rem',
+    padding: '0 1rem',
+
+    '&:hover': {
+      backgroundColor: colors.inverseBackgroundDark
+    }
   }),
   envPresetColumn: css({
     display: 'flex',
     flexDirection: 'column',
-    margin: '0 0 0.5rem',
+    margin: '0.5rem 0',
     flex: '0 0 auto'
   }),
   envPresetColumnLabel: css({

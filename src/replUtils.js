@@ -5,6 +5,7 @@ import StorageService from './StorageService';
 import UriUtils from './UriUtils';
 
 import type {
+  BabelPresetEnvResult,
   EnvConfig,
   PersistedState,
   PluginConfig,
@@ -42,13 +43,10 @@ export const loadPersistedState = (): PersistedState => {
     code: merged.code || '',
     debug: merged.debug === true,
     evaluate: merged.evaluate === true,
-    experimental: merged.experimental === true,
     lineWrap: merged.lineWrap != null ? merged.lineWrap : true,
-    loose: merged.loose === true,
     presets: merged.presets || '',
     prettier: merged.prettier === true,
     showSidebar: merged.showSidebar === true,
-    spec: merged.spec === true,
     targets: merged.targets || ''
   };
 };
@@ -97,18 +95,20 @@ export const persistedStateToEnvConfig = (
       const name = pieces[0].toLowerCase();
       const value = parseFloat(pieces[1]);
 
-      switch (name) {
-        case 'electron':
-          envConfig.electron = value;
-          envConfig.isElectronEnabled = true;
-          break;
-        case 'node':
-          envConfig.node = value;
-          envConfig.isNodeEnabled = true;
-          break;
-        default:
-          console.warn(`Unknown env target "${name}" specified`);
-          break;
+      if (name) {
+        switch (name) {
+          case 'electron':
+            envConfig.electron = value;
+            envConfig.isElectronEnabled = true;
+            break;
+          case 'node':
+            envConfig.node = value;
+            envConfig.isNodeEnabled = true;
+            break;
+          default:
+            console.warn(`Unknown env target "${name}" specified`);
+            break;
+        }
       }
     } catch (error) {
       console.error('Error parsing env preset configuration', error);
@@ -116,4 +116,37 @@ export const persistedStateToEnvConfig = (
   });
 
   return envConfig;
+};
+
+export const getDebugInfoFromEnvResult = (
+  result: BabelPresetEnvResult
+): string => {
+  const debugInfo = [];
+
+  const targetNames = Object.keys(result.targets);
+  if (targetNames.length) {
+    debugInfo.push(
+      'Using targets:\n' +
+        targetNames.map(name => `• ${name}: ${result.targets[name]}`).join('\n')
+    );
+  }
+
+  if (result.transformationsWithTargets.length) {
+    debugInfo.push(
+      'Using plugins:\n' +
+        result.transformationsWithTargets
+          .map(item => `• ${item.name}`)
+          .join('\n')
+    );
+  }
+
+  // This property will only be set if we compiled with useBuiltIns=true
+  if (result.polyfillsWithTargets && result.polyfillsWithTargets.length) {
+    debugInfo.push(
+      'Using polyfills:\n' +
+        result.polyfillsWithTargets.map(item => `• ${item.name}`).join('\n')
+    );
+  }
+
+  return debugInfo.join('\n\n');
 };

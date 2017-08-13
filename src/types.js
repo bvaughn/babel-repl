@@ -47,12 +47,27 @@ export type PersistedState = {
   code: string,
   debug: boolean,
   evaluate: boolean,
-  experimental: boolean,
   lineWrap: boolean,
-  loose: boolean,
   presets: string,
   prettier: boolean,
   showSidebar: boolean,
-  spec: boolean,
   targets: string
+};
+
+type BabelPresetTargetsMap = {
+  [key: string]: number
+};
+
+type BabelNamedPresetAndTarget = {
+  name: string,
+  targets: BabelPresetTargetsMap
+};
+
+export type BabelPresetEnvResult = {
+  modulePlugin: string,
+  polyfills: ?Array<string>,
+  polyfillsWithTargets: ?Array<BabelNamedPresetAndTarget>,
+  targets: BabelPresetTargetsMap,
+  transformations: Array<string>,
+  transformationsWithTargets: Array<BabelNamedPresetAndTarget>
 };
