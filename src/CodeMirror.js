@@ -2,6 +2,7 @@
 
 import { css } from 'glamor';
 import React from 'react';
+import { colors } from './styles';
 
 const DEFAULT_CODE_MIRROR_OPTIONS = {
   autoCloseBrackets: true,
@@ -10,6 +11,7 @@ const DEFAULT_CODE_MIRROR_OPTIONS = {
   mode: 'text/jsx',
   lineNumbers: true,
   showCursorWhenSelecting: true,
+  styleActiveLine: true,
   tabWidth: 2
 };
 
@@ -17,6 +19,7 @@ type Props = {
   autoFocus: boolean,
   onChange: (value: string) => void,
   options: Object,
+  placeholder?: string,
   value: ?string,
   preserveScrollPosition: boolean
 };
@@ -94,6 +97,7 @@ export default class CodeMirror extends React.Component {
         autoFocus={this.props.autoFocus}
         defaultValue={this.props.value}
         ref={this._setTextAreaRef}
+        placeholder={this.props.placeholder}
       />
     );
   }
@@ -121,4 +125,8 @@ css.global('.CodeMirror', {
   height: '100% !important',
   width: '100% !important',
   '-webkit-overflow-scrolling': 'touch'
+});
+
+css.global('pre.CodeMirror-placeholder', {
+  color: colors.foregroundLight
 });
