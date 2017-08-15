@@ -122,10 +122,13 @@ export default class Repl extends React.Component {
       lineWrapping: state.lineWrap
     };
 
-    let compiled = state.compiled;
-    if (state.map) {
-      // $FlowFixMe
-      compiled += `\n\n// Source map:\n// ${state.map}`;
+    let compiled = null;
+    if (state.code) {
+      compiled = state.compiled;
+      if (state.map) {
+        // $FlowFixMe
+        compiled += `\n\n// ${state.map}`;
+      }
     }
 
     return (
