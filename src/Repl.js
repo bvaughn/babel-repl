@@ -125,7 +125,7 @@ export default class Repl extends React.Component {
     let compiled = state.compiled;
     if (state.map) {
       // $FlowFixMe
-      //compiled += `\n\n// Source map:\n// ${state.map}`;
+      compiled += `\n\n// Source map:\n// ${state.map}`;
     }
 
     return (
@@ -160,15 +160,7 @@ export default class Repl extends React.Component {
             className={styles.codeMirrorPanel}
             code={compiled}
             error={state.evalError}
-            info={
-              <a
-                href={`data:application/json;base64,${btoa(
-                  unescape(encodeURIComponent(state.map))
-                )}`}
-              >
-                Source map
-              </a>
-            }
+            info={state.debugEnvPreset ? state.envPresetDebugInfo : null}
             options={options}
             placeholder="Compiled output will be shown here"
           />
