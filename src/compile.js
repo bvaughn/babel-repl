@@ -38,9 +38,7 @@ export default function compile(code: string, config: CompileConfig): Return {
     compiled = transformed.code;
 
     try {
-      map = `\n//@ sourceMappingURL=data:application/json;base64,${btoa(
-        unescape(encodeURIComponent(JSON.stringify(transformed.map)))
-      )}`;
+      map = JSON.stringify(transformed.map);
     } catch (error) {
       console.error(`Source Map generation failed: ${error}`);
     }
