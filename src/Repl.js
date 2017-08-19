@@ -8,6 +8,7 @@ import StorageService from './StorageService';
 import UriUtils from './UriUtils';
 import compile from './compile';
 import loadPlugin from './loadPlugin';
+import scopedEval from './scopedEval';
 import {
   envPresetConfig,
   pluginConfigs,
@@ -45,10 +46,10 @@ type State = {
   evalError: ?Error,
   isSidebarExpanded: boolean,
   lineWrap: boolean,
-  map: ?string,
   plugins: PluginStateMap,
   presets: PluginStateMap,
-  runtimePolyfillState: PluginState
+  runtimePolyfillState: PluginState,
+  sourceMap: ?string
 };
 
 export default class Repl extends React.Component {
@@ -97,13 +98,13 @@ export default class Repl extends React.Component {
       evalError: null,
       isSidebarExpanded: persistedState.showSidebar,
       lineWrap: persistedState.lineWrap,
-      map: null,
       plugins: configArrayToStateMap(pluginConfigs, defaultPlugins),
       presets: configArrayToStateMap(presetPluginConfigs, defaultPresets),
       runtimePolyfillState: configToState(
         runtimePolyfillConfig,
         persistedState.evaluate
-      )
+      ),
+      sourceMap: null
     };
 
     this.state = {
@@ -121,15 +122,6 @@ export default class Repl extends React.Component {
     const options = {
       lineWrapping: state.lineWrap
     };
-
-    let compiled = null;
-    if (state.code) {
-      compiled = state.compiled;
-      if (state.map) {
-        // $FlowFixMe
-        compiled += `\n\n// ${state.map}`;
-      }
-    }
 
     return (
       <div className={styles.repl}>
@@ -161,7 +153,7 @@ export default class Repl extends React.Component {
           />
           <CodeMirrorPanel
             className={styles.codeMirrorPanel}
-            code={compiled}
+            code={state.compiled}
             error={state.evalError}
             info={state.debugEnvPreset ? state.envPresetDebugInfo : null}
             options={options}
@@ -192,7 +184,7 @@ export default class Repl extends React.Component {
           this._numLoadingPlugins--;
 
           if (!success) {
-            this.setState(state => ({
+            this.setState(() => ({
               plugins
             }));
           }
@@ -212,11 +204,15 @@ export default class Repl extends React.Component {
       loadPlugin(runtimePolyfillState, () => {
         let evalError = null;
 
+        if (!this.state.compiled) {
+          return;
+        }
+
         // No need to recompile at this point;
         // Just evaluate the most recently compiled code.
         try {
           // eslint-disable-next-line
-          eval(this.state.compiled);
+          scopedEval(this.state.compiled, this.state.sourceMap);
         } catch (error) {
           evalError = error;
         }

@@ -79,13 +79,12 @@ const parseQuery = () => {
 };
 
 const updateQuery = (state: PersistedState) => {
-  var query = Object.keys(state)
-    .map(
-      key =>
-        key === 'code'
-          ? `${key}_lz=` + compress(state.code)
-          : key + '=' + encode(state[key])
-    )
+  const query = Object.keys(state)
+    .map(key => {
+      return key === 'code'
+        ? `${key}_lz=` + compress(state.code)
+        : key + '=' + encode(state[key]);
+    })
     .join('&');
 
   window.location.hash = '?' + query;

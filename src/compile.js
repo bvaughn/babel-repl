@@ -1,5 +1,7 @@
 // @flow
 
+import scopedEval from './scopedEval';
+
 import type { CompileConfig } from './types';
 
 type Return = {
@@ -24,7 +26,7 @@ export default function compile(code: string, config: CompileConfig): Return {
   let compiled = null;
   let compileError = null;
   let evalError = null;
-  let map = null;
+  let sourceMap = null;
 
   try {
     const transformed = window.Babel.transform(code, {
@@ -38,7 +40,7 @@ export default function compile(code: string, config: CompileConfig): Return {
     compiled = transformed.code;
 
     try {
-      map = JSON.stringify(transformed.map);
+      sourceMap = JSON.stringify(transformed.map);
     } catch (error) {
       console.error(`Source Map generation failed: ${error}`);
     }
@@ -60,7 +62,7 @@ export default function compile(code: string, config: CompileConfig): Return {
     if (config.evaluate) {
       try {
         // eslint-disable-next-line
-        eval(compiled);
+        scopedEval(compiled, sourceMap);
       } catch (error) {
         evalError = error;
       }
@@ -68,7 +70,7 @@ export default function compile(code: string, config: CompileConfig): Return {
   } catch (error) {
     compiled = null;
     compileError = error;
-    map = null;
+    sourceMap = null;
   }
 
   return {
@@ -76,6 +78,6 @@ export default function compile(code: string, config: CompileConfig): Return {
     compiled,
     compileError,
     evalError,
-    map
+    sourceMap
   };
 }

@@ -24,10 +24,11 @@ type Props = {
   preserveScrollPosition: boolean
 };
 
-export default class CodeMirror extends React.Component {
+export default class ReactCodeMirror extends React.Component {
   static defaultProps = {
     autoFocus: false,
     preserveScrollPosition: false,
+    // eslint-disable-next-line no-unused-vars
     onChange: (value: string) => {}
   };
 
@@ -62,7 +63,7 @@ export default class CodeMirror extends React.Component {
       this._codeMirror.getValue() !== nextProps.value
     ) {
       if (nextProps.preserveScrollPosition) {
-        var prevScrollPosition = this._codeMirror.getScrollInfo();
+        const prevScrollPosition = this._codeMirror.getScrollInfo();
         this._codeMirror.setValue(nextProps.value);
         this._codeMirror.scrollTo(
           prevScrollPosition.left,
@@ -76,7 +77,7 @@ export default class CodeMirror extends React.Component {
     }
 
     if (typeof nextProps.options === 'object') {
-      for (let optionName in nextProps.options) {
+      for (const optionName in nextProps.options) {
         if (nextProps.options.hasOwnProperty(optionName)) {
           this._updateOption(optionName, nextProps.options[optionName]);
         }
@@ -127,6 +128,6 @@ css.global('.CodeMirror', {
   '-webkit-overflow-scrolling': 'touch'
 });
 
-css.global('pre.CodeMirror-placeholder', {
+css.global('.CodeMirror-lines pre.CodeMirror-placeholder', {
   color: colors.foregroundLight
 });

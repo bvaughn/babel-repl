@@ -2,7 +2,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import Repl from './Repl';
+import './index.css';
 
 ReactDOM.render(<Repl />, document.getElementById('root'));
+
+if (module.hot) {
+  // $FlowFixMe
+  module.hot.accept();
+}
